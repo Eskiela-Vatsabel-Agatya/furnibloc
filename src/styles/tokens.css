@@ -1,0 +1,111 @@
+/*
+  FurniBLOC design tokens — the ONLY place hex values live (one exception: src/lib/qr.ts).
+  Rules: copper is the single brand color (D5). Olive is neutral ink only, never an accent.
+  Spacing is a 4px grid. Shadow alpha is capped at .18 (squint test, D3).
+  Measured contrast: run `npm run contrast`.
+*/
+:root {
+  /* ---- Brand: copper ramp (single brand color) ---- */
+  --brand-50:  #FBF5EC;
+  --brand-100: #F6E8D2;
+  --brand-200: #EED3AB;
+  --brand-300: #E2B87E;
+  --brand-400: #D4994F;
+  --brand-500: #C4812F;
+  --brand-600: #A86924;
+  --brand-700: #85521E;   /* primary fill + price text: white on 700 = 6.5:1 (600 is only 4.46:1) */
+  --brand-800: #6B4220;
+  --brand-900: #4F3220;
+  --brand-950: #2E1C10;
+
+  /* ---- Neutrals: warm surface + olive ink (text only) ---- */
+  --surface:        #F3EBDF;
+  --surface-raised: #F8F2E8;   /* hover brightening */
+  --surface-sunken: #EBE1D2;
+  --ink-900: #2F2E17;
+  --ink-700: #4A4A2A;
+  --ink-500: #6B6A4C;
+  --white:   #FFFFFF;
+
+  /* ---- Borders ---- */
+  --border-soft:    #E2D4BE;   /* decorative edges on non-interactive surfaces */
+  --border-control: #A57B45;   /* every interactive control: 3.2:1 on surface */
+
+  /* ---- Semantic colors (design.md §2.3, meaning only) ---- */
+  --success:  #16A34A;
+  --warning:  #D97706;
+  --danger:   #DC2626;
+  --info:     #2563EB;
+  --whatsapp: #25D366;         /* icon accent */
+  --whatsapp-strong: #0F7A3D;  /* button fill: white text 5.4:1 */
+
+  /* Badges (flat) */
+  --promo-bg:  #FDE9B8;
+  --promo-ink: #6B3F00;
+  --info-bg:   #DBE7FB;
+  --info-ink:  #1E3A8A;
+  --danger-bg:  #FBE0E0;
+  --danger-ink: #8A1C1C;
+  --warning-bg: #FDE9B8;
+  --warning-ink: #6B3F00;
+
+  /* Footer (flat dark-ink surface) */
+  --footer-text:  #F3EBDF;
+  --footer-muted: #D9CFB8;
+  --scrim: rgba(47, 46, 23, .55);
+
+  /* ---- Spacing: multiples of 4px ---- */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-7: 28px;  --space-8: 32px;
+  --space-9: 36px;  --space-10: 40px; --space-11: 44px; --space-12: 48px;
+  --space-13: 52px; --space-14: 56px; --space-15: 60px; --space-16: 64px;
+
+  /* ---- Radii ---- */
+  --radius-sm: 12px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* ---- Soft-UI shadows (alpha capped, offsets multiples of 4) ---- */
+  --shadow-raised:    8px 8px 24px rgba(122, 84, 40, .16), -8px -8px 24px rgba(255, 255, 255, .85);
+  --shadow-raised-sm: 4px 4px 12px rgba(122, 84, 40, .16), -4px -4px 12px rgba(255, 255, 255, .85);
+  --shadow-inset:     inset 4px 4px 12px rgba(122, 84, 40, .16), inset -4px -4px 12px rgba(255, 255, 255, .85);
+  --shadow-flat-cta:  0 2px 8px rgba(47, 46, 23, .18);
+
+  /* ---- Typography: one family (Plus Jakarta Sans), two weights, six sizes ---- */
+  --font: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --weight-regular: 400;
+  --weight-bold: 700;
+  --text-64: clamp(40px, 7vw, 64px);
+  --text-42: clamp(32px, 5vw, 42px);
+  --text-32: clamp(24px, 3.6vw, 32px);
+  --text-20: 20px;
+  --text-16: 16px;
+  --text-14: 14px;
+  --tracking-display: -0.025em;   /* -2.5% on large display text */
+  --leading-display: 1.15;        /* 115% */
+  --leading-body: 1.6;
+  --leading-ui: 1.5;
+
+  /* ---- Layout ---- */
+  --container: 1200px;
+  --gutter: var(--space-5);
+  --header-h: 72px;
+
+  /* ---- Motion ---- */
+  --dur-fast: 150ms;
+  --dur: 250ms;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+
+  /* ---- Z-index ---- */
+  --z-header: 100;
+  --z-overlay: 200;
+  --z-toast: 300;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+  }
+}

@@ -1,0 +1,20 @@
+---
+/**
+ * Well — inset container for the 3D / photo stage.
+ * Props: ratio? CSS aspect-ratio value such as "4 / 5" or "1" (reserves space, no layout shift), class?
+ * Text over imagery inside a well must carry a gradient (design.md §7).
+ */
+interface Props { ratio?: string; class?: string; [k: string]: unknown }
+const { ratio, class: cls, ...rest } = Astro.props;
+---
+<div class:list={['well', cls]} style={ratio ? `aspect-ratio:${ratio}` : undefined} {...rest}><slot /></div>
+
+<style>
+  .well {
+    position: relative; overflow: hidden;
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-inset);
+  }
+</style>

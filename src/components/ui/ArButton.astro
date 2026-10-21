@@ -1,0 +1,55 @@
+---
+/**
+ * ArButton — the AR / 3D launch affordance. An OUTLINED copper pill, never filled, with its own icon, so it
+ * reads as a different kind of action from every other button (design.md §8).
+ * Props:
+ *   state   'hidden' (not rendered visually; no dead tap before the model has loaded) | 'ready' | 'busy'
+ *   icon    Icon name, default 'ar' ('cube' for "Lihat 3D & AR" on cards)
+ *   href    renders <a> (card use); otherwise <button type="button"> (viewer slot="ar-button")
+ *   size    'md' | 'sm'
+ *   class   extras. `is-hover` / `is-active` force a state (/dev/kit)
+ * Scripts toggle `data-state` ('hidden' | 'ready' | 'busy'). States: default, hover, active, disabled (= busy), focus.
+ */
+import Icon from './Icon.astro';
+interface Props { state?: 'hidden' | 'ready' | 'busy'; icon?: string; href?: string; size?: 'sm' | 'md'; class?: string; [k: string]: unknown }
+const { state = 'ready', icon = 'ar', href, size = 'md', class: cls, ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+const busy = state === 'busy';
+const tagProps: Record<string, unknown> = href ? { href: busy ? undefined : href } : { type: 'button', disabled: busy };
+---
+<Tag class:list={['ar-btn', `ar-btn--${size}`, cls]} data-state={state} aria-busy={busy ? 'true' : undefined} {...tagProps} {...rest}>
+  <Icon name={icon} />
+  <span><slot>Lihat di ruanganmu</slot></span>
+  <span class="ar-btn__spinner" aria-hidden="true"></span>
+</Tag>
+
+<style>
+  .ar-btn {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-3) var(--space-6);
+    background: transparent;
+    color: var(--brand-700);
+    border: 2px solid var(--brand-700);
+    border-radius: var(--radius-pill);
+    font-family: var(--font); font-weight: var(--weight-bold); font-size: var(--text-16); line-height: var(--space-6);
+    text-decoration: none; white-space: nowrap; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  }
+  .ar-btn--sm { padding: var(--space-2) var(--space-4); font-size: var(--text-14); }
+  .ar-btn[data-state='hidden'] { display: none; }
+  .ar-btn:is(:hover, .is-hover) { background: var(--brand-50); color: var(--brand-800); }
+  .ar-btn:is(:active, .is-active) { background: var(--brand-100); }
+  .ar-btn:is(:disabled, [data-state='busy']) { cursor: progress; opacity: .7; }
+  .ar-btn__spinner { display: none; }
+  .ar-btn[data-state='busy'] :global(svg) { display: none; }
+  .ar-btn[data-state='busy'] .ar-btn__spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+    animation: spin 700ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ar-btn[data-state='busy'] .ar-btn__spinner { animation: none; border-right-color: currentColor; } }
+</style>

@@ -1,0 +1,29 @@
+---
+/**
+ * Wordmark — uses the real logo if one is dropped at src/assets/brand/logo.(svg|png|webp);
+ * otherwise a typographic "FURNI BLOC" wordmark.
+ * TEMP: replace with logo (design.md §2.4). No logo file has been supplied yet.
+ * Props: tone 'ink' (default, on light) | 'light' (on the dark footer), class?
+ */
+import site from '../../data/site';
+interface Props { tone?: 'ink' | 'light'; class?: string }
+const { tone = 'ink', class: cls } = Astro.props;
+const logos = import.meta.glob<{ default: ImageMetadata }>('/src/assets/brand/logo.{svg,png,webp}', { eager: true });
+const logo = Object.values(logos)[0]?.default;
+---
+{logo ? (
+  <img class:list={['wm-img', cls]} src={logo.src} width={logo.width} height={logo.height} alt={site.name} />
+) : (
+  <span class:list={['wm', `wm--${tone}`, cls]} aria-label={site.name}>
+    <span class="wm__main" aria-hidden="true"><strong>FURNI</strong>BLOC</span>
+  </span>
+)}
+
+<style>
+  .wm-img { height: 32px; width: auto; }
+  .wm { display: inline-flex; flex-direction: column; line-height: 1; }
+  .wm__main { font-size: var(--text-20); letter-spacing: .12em; font-weight: var(--weight-regular); }
+  .wm__main strong { font-weight: var(--weight-bold); }
+  .wm--ink { color: var(--ink-900); }
+  .wm--light { color: var(--footer-text); }
+</style>

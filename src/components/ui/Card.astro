@@ -1,0 +1,26 @@
+---
+/**
+ * Card — raised soft-UI surface, radius-lg.
+ * Props: as ('div' | 'article' | 'section' | 'li', default 'div'), interactive? (tiny hover lift, pressed = inset),
+ *        class?. States for interactive cards: default, hover, active.
+ * Interactive cards keep a soft edge (--border-soft): the card is identified by its content (photo, name, price, CTA),
+ * not by its outline, so the 3:1 control-border rule applies to the controls inside it.
+ */
+interface Props { as?: string; interactive?: boolean; class?: string; [k: string]: unknown }
+const { as: Tag = 'div', interactive = false, class: cls, ...rest } = Astro.props;
+---
+<Tag class:list={['card', interactive && 'card--interactive', cls]} {...rest}><slot /></Tag>
+
+<style>
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-raised);
+    padding: var(--space-6);
+  }
+  .card--interactive { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+  .card--interactive:is(:hover, .is-hover) { transform: translateY(-2px); background: var(--surface-raised); }
+  .card--interactive:is(:active, .is-active) { transform: none; box-shadow: var(--shadow-inset); background: var(--surface-sunken); }
+</style>

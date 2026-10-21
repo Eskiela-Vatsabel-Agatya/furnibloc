@@ -1,0 +1,91 @@
+---
+/**
+ * SegmentedControl — inset track with a raised selected pill (container-within-container = selected).
+ * role="tablist" semantics; roving tabindex; Left/Right/Home/End move AND select.
+ * Props:
+ *   items       [{ value, label, icon? }]   1 to 3 items (throws otherwise)
+ *   value       selected value (defaults to first)
+ *   label       accessible name of the tablist (required)
+ *   idPrefix    optional. Tabs get id `${idPrefix}-tab-${value}` and aria-controls `${idPrefix}-panel-${value}`
+ * Emits a bubbling CustomEvent 'segmented:change' ({ detail: { value } }) from the tablist.
+ * Pages can remove a tab at runtime with el.querySelector('[data-value=x]').remove() (Phase 2 does for failed 3D).
+ */
+import Icon from './Icon.astro';
+interface Item { value: string; label: string; icon?: string }
+interface Props { items: Item[]; value?: string; label: string; idPrefix?: string; class?: string }
+const { items, value, label, idPrefix, class: cls } = Astro.props;
+if (items.length < 1 || items.length > 3) throw new Error(`SegmentedControl supports 1–3 items, got ${items.length}`);
+const selected = value ?? items[0].value;
+---
+<div class:list={['seg', cls]} role="tablist" aria-label={label} data-segmented>
+  {items.map((it) => (
+    <button
+      type="button" role="tab" class="seg__tab"
+      id={idPrefix ? `${idPrefix}-tab-${it.value}` : undefined}
+      aria-controls={idPrefix ? `${idPrefix}-panel-${it.value}` : undefined}
+      aria-selected={it.value === selected ? 'true' : 'false'}
+      tabindex={it.value === selected ? 0 : -1}
+      data-value={it.value}
+    >
+      {it.icon && <Icon name={it.icon} size={20} />}
+      <span>{it.label}</span>
+    </button>
+  ))}
+</div>
+
+<style>
+  .seg {
+    display: inline-flex; gap: var(--space-1); padding: var(--space-1);
+    background: var(--surface-sunken); border: 1px solid var(--border-control);
+    border-radius: var(--radius-pill); box-shadow: var(--shadow-inset);
+  }
+  .seg__tab {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    min-height: 44px; padding: var(--space-2) var(--space-5);
+    background: transparent; color: var(--ink-700);
+    border: 1px solid transparent; border-radius: var(--radius-pill);
+    font-family: var(--font); font-weight: var(--weight-bold); font-size: var(--text-14); line-height: var(--space-6);
+    cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }
+  .seg__tab:is(:hover, .is-hover) { color: var(--ink-900); background: var(--surface-raised); }
+  .seg__tab:is(:active, .is-active) { background: var(--surface-sunken); }
+  .seg__tab[aria-selected='true'] {
+    background: var(--surface); color: var(--brand-700);
+    border-color: var(--border-control); box-shadow: var(--shadow-raised-sm);
+  }
+  .seg__tab:disabled { opacity: .5; cursor: not-allowed; }
+</style>
+
+<script>
+  // One delegated handler serves every SegmentedControl on the page.
+  function select(tablist: HTMLElement, tab: HTMLElement, focus: boolean) {
+    tablist.querySelectorAll<HTMLElement>('[role="tab"]').forEach((t) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    if (focus) tab.focus();
+    tablist.dispatchEvent(new CustomEvent('segmented:change', { bubbles: true, detail: { value: tab.dataset.value } }));
+  }
+  document.addEventListener('click', (e) => {
+    const tab = (e.target as HTMLElement).closest<HTMLElement>('[data-segmented] [role="tab"]');
+    if (!tab || tab.hasAttribute('disabled') || tab.getAttribute('aria-selected') === 'true') return;
+    select(tab.closest<HTMLElement>('[data-segmented]')!, tab, false);
+  });
+  document.addEventListener('keydown', (e) => {
+    const tab = (e.target as HTMLElement).closest<HTMLElement>('[data-segmented] [role="tab"]');
+    if (!tab) return;
+    const list = tab.closest<HTMLElement>('[data-segmented]')!;
+    const tabs = [...list.querySelectorAll<HTMLElement>('[role="tab"]:not([disabled])')];
+    const i = tabs.indexOf(tab);
+    let next: HTMLElement | undefined;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = tabs[(i + 1) % tabs.length];
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = tabs[(i - 1 + tabs.length) % tabs.length];
+    else if (e.key === 'Home') next = tabs[0];
+    else if (e.key === 'End') next = tabs[tabs.length - 1];
+    if (!next) return;
+    e.preventDefault();
+    select(list, next, true);
+  });
+</script>

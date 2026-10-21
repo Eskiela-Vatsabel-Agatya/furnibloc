@@ -1,0 +1,29 @@
+---
+/**
+ * Chip — filter pill. Raised when idle, inset + copper text when selected.
+ * Props: selected? (aria-pressed), disabled?, value? (data-value for filter scripts), class?
+ * States: default, hover, active, selected, disabled, focus.
+ */
+interface Props { selected?: boolean; disabled?: boolean; value?: string; class?: string; [k: string]: unknown }
+const { selected = false, disabled = false, value, class: cls, ...rest } = Astro.props;
+---
+<button type="button" class:list={['chip', cls]} aria-pressed={selected ? 'true' : 'false'} data-value={value} disabled={disabled} {...rest}>
+  <slot />
+</button>
+
+<style>
+  .chip {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    min-height: 44px; padding: var(--space-2) var(--space-5);
+    background: var(--surface); color: var(--ink-900);
+    border: 1px solid var(--border-control); border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-raised-sm);
+    font-family: var(--font); font-weight: var(--weight-bold); font-size: var(--text-14); line-height: var(--space-6);
+    cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }
+  .chip:is(:hover, .is-hover) { background: var(--surface-raised); }
+  .chip:is(:active, .is-active) { background: var(--surface-sunken); box-shadow: var(--shadow-inset); }
+  .chip[aria-pressed='true'] { background: var(--brand-100); color: var(--brand-700); box-shadow: var(--shadow-inset); }
+  .chip:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; background: var(--surface); }
+</style>

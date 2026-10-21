@@ -1,0 +1,50 @@
+---
+/**
+ * Toast — the outcome microinteraction (design.md §7: "link copied", not just a button state change).
+ * Mounted once in BaseLayout. Trigger from any client script:  import { showToast } from '../../lib/toast'; showToast('Link disalin');
+ * Auto-dismisses after ~3 s. aria-live="polite". Props: none.
+ */
+---
+<div class="toast-region" aria-live="polite" aria-atomic="true" data-toast-region>
+  <div class="toast" data-toast></div>
+</div>
+
+<style>
+  .toast-region {
+    position: fixed; left: 0; right: 0;
+    bottom: max(var(--space-6), env(safe-area-inset-bottom));
+    z-index: var(--z-toast);
+    display: flex; justify-content: center; pointer-events: none; padding-inline: var(--gutter);
+  }
+  .toast {
+    pointer-events: none;
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    max-width: 100%;
+    padding: var(--space-3) var(--space-6);
+    background: var(--ink-900); color: var(--footer-text);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-flat-cta);
+    font-weight: var(--weight-bold); font-size: var(--text-14); line-height: var(--space-6);
+    opacity: 0; transform: translateY(var(--space-2));
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .toast.is-visible { opacity: 1; transform: none; }
+</style>
+
+<script>
+  const el = document.querySelector<HTMLElement>('[data-toast]');
+  let hideTimer: number | undefined;
+  let removeTimer: number | undefined;
+  window.addEventListener('toast:show', (e) => {
+    if (!el) return;
+    const { message, ms } = (e as CustomEvent<{ message: string; ms: number }>).detail;
+    window.clearTimeout(hideTimer);
+    window.clearTimeout(removeTimer);
+    el.textContent = message;          // text change inside the live region is announced
+    requestAnimationFrame(() => el.classList.add('is-visible'));
+    hideTimer = window.setTimeout(() => {
+      el.classList.remove('is-visible');
+      removeTimer = window.setTimeout(() => { el.textContent = ''; }, 300);
+    }, ms);
+  });
+</script>

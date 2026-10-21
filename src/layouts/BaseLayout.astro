@@ -1,0 +1,89 @@
+---
+/**
+ * BaseLayout props:
+ *  title          page <title> (required)
+ *  description    meta description (required)
+ *  canonicalPath  path starting with "/" ("/" for home), joined to astro `site`
+ *  image?         absolute or site-relative OG image URL (Phase 3 supplies the real one)
+ *  noindex?       adds robots noindex (dev pages)
+ */
+import '../styles/global.css';
+import site from '../data/site';
+import { waLink } from '../lib/whatsapp';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import PromoBar from '../components/layout/PromoBar.astro';
+import Toast from '../components/ui/Toast.astro';
+import tokensCss from '../styles/tokens.css?raw';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  image?: string;
+  noindex?: boolean;
+}
+const { title, description, canonicalPath = '/', image, noindex = false } = Astro.props;
+
+const origin = Astro.site ?? new URL(site.url);
+const canonical = new URL(canonicalPath, origin).toString();
+const ogImage = image ? new URL(image, origin).toString() : undefined;
+// theme-color must be a literal in <meta>; read it from tokens.css so there is still one source of truth.
+const themeColor = tokensCss.match(/--surface:\s*(#[0-9A-Fa-f]{6})/)?.[1] ?? '';
+const assetBase = (import.meta.env.PUBLIC_ASSET_BASE ?? '').replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content={themeColor} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    {assetBase && <link rel="preconnect" href={assetBase} crossorigin />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Lewati ke konten utama</a>
+    <PromoBar />
+    <Header />
+    <noscript>
+      <p class="noscript">
+        Situs ini berjalan paling baik dengan JavaScript aktif (pratinjau 3D dan AR membutuhkannya).
+        Anda tetap bisa menghubungi kami lewat <a href={waLink({})}>WhatsApp</a>.
+      </p>
+    </noscript>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <Toast />
+  </body>
+</html>
+
+<style is:global>
+  .noscript {
+    padding: var(--space-4) var(--gutter);
+    background: var(--warning-bg);
+    color: var(--warning-ink);
+    text-align: center;
+    font-size: var(--text-14);
+  }
+  .noscript a { color: inherit; font-weight: var(--weight-bold); }
+  main:focus { outline: none; }
+</style>

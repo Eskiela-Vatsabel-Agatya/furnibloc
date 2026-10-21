@@ -1,0 +1,44 @@
+---
+/**
+ * PromoBar — rendered only when site.promo is non-null (and, if `until` is set, not yet expired at build time).
+ * Dismissible; the dismissal is remembered for the session (sessionStorage in try/catch; works without it).
+ * Props: none.
+ */
+import site from '../../data/site';
+import Icon from '../ui/Icon.astro';
+const promo = site.promo;
+const live = promo && (!promo.until || new Date(promo.until) >= new Date());
+---
+{live && (
+  <div class="promo" data-promo role="region" aria-label="Promo">
+    <p>{promo.text}</p>
+    <button type="button" class="promo__close" data-promo-close aria-label="Tutup promo"><Icon name="close" size={20} /></button>
+  </div>
+)}
+
+<style>
+  .promo {
+    display: flex; align-items: center; justify-content: center; gap: var(--space-4);
+    padding: var(--space-2) var(--gutter);
+    background: var(--brand-900); color: var(--footer-text);
+    font-weight: var(--weight-bold); font-size: var(--text-14); text-align: center;
+  }
+  .promo[hidden] { display: none; }
+  .promo__close {
+    display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none;
+    background: transparent; color: inherit; border: 1px solid var(--footer-muted); border-radius: var(--radius-pill); cursor: pointer;
+  }
+  .promo__close:hover { background: var(--brand-800); }
+  .promo__close:active { background: var(--brand-950); }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-promo]');
+  if (bar) {
+    try { if (sessionStorage.getItem('promo-dismissed') === '1') bar.hidden = true; } catch { /* storage unavailable: show the bar */ }
+    bar.querySelector('[data-promo-close]')?.addEventListener('click', () => {
+      bar.hidden = true;
+      try { sessionStorage.setItem('promo-dismissed', '1'); } catch { /* ignore */ }
+    });
+  }
+</script>

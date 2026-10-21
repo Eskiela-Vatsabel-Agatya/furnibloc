@@ -1,0 +1,52 @@
+---
+/**
+ * Select — same look as Input (native <select>, so it works everywhere).
+ * Props: id (required), label (required), name?, options [{ value, label }], value?, hint?, error?, warning?, disabled?, class?
+ * States: default, hover, focus, error, warning, disabled.
+ */
+import Icon from './Icon.astro';
+interface Props {
+  id: string; label: string; name?: string; options: { value: string; label: string }[]; value?: string;
+  hint?: string; error?: string; warning?: string; disabled?: boolean; class?: string; [k: string]: unknown;
+}
+const { id, label, name, options, value, hint, error, warning, disabled = false, class: cls, ...rest } = Astro.props;
+const msg = error ?? warning ?? hint;
+const state = error ? 'error' : warning ? 'warning' : 'default';
+const msgId = msg ? `${id}-msg` : undefined;
+---
+<div class:list={['field', `field--${state}`, cls]}>
+  <label class="field__label" for={id}>{label}</label>
+  <div class="field__control">
+    <select class="field__input" id={id} name={name ?? id} disabled={disabled}
+      aria-invalid={error ? 'true' : undefined} aria-describedby={msgId} {...rest}>
+      {options.map((o) => <option value={o.value} selected={o.value === value}>{o.label}</option>)}
+    </select>
+    <Icon name="chevron" size={20} class="field__chev" />
+  </div>
+  {msg && <p class="field__msg" id={msgId} role={error ? 'alert' : undefined}>{msg}</p>}
+</div>
+
+<style>
+  .field { display: grid; gap: var(--space-2); }
+  .field__label { font-weight: var(--weight-bold); font-size: var(--text-14); color: var(--ink-900); }
+  .field__control { position: relative; display: flex; align-items: center; }
+  .field__control :global(.field__chev) { position: absolute; right: var(--space-4); transform: rotate(90deg); color: var(--ink-700); pointer-events: none; }
+  .field__input {
+    width: 100%; min-height: 48px; appearance: none; -webkit-appearance: none;
+    padding: var(--space-3) var(--space-12) var(--space-3) var(--space-4);
+    background: var(--surface-sunken); color: var(--ink-900);
+    border: 1px solid var(--border-control); border-radius: var(--radius);
+    box-shadow: var(--shadow-inset);
+    font-family: var(--font); font-size: var(--text-16); line-height: var(--space-6);
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+  }
+  .field__input:hover { background: var(--surface); }
+  .field__input:focus { outline: 2px solid var(--brand-600); outline-offset: 2px; border-color: var(--brand-600); background: var(--surface); }
+  .field__input:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; background: var(--surface); }
+  .field--error .field__input { border-color: var(--danger); }
+  .field--warning .field__input { border-color: var(--warning-ink); }
+  .field__msg { font-size: var(--text-14); line-height: var(--leading-ui); color: var(--ink-700); }
+  .field--error .field__msg { color: var(--danger-ink); }
+  .field--warning .field__msg { color: var(--warning-ink); }
+</style>

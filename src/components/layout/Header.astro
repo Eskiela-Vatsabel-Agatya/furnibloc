@@ -1,0 +1,130 @@
+---
+/**
+ * Header — floating soft-UI bar, sticky, safe-area aware.
+ * Reads site.nav (only `enabled` items render). WhatsApp CTA is always one tap away (icon-only on phones).
+ * Under 900px the nav moves into a modal <dialog> sheet: focus-trapped (native), closes on Esc, backdrop and link tap.
+ * With no enabled nav items there is no menu button at all (nothing to open).
+ * Props: none.
+ */
+import site from '../../data/site';
+import { waLink } from '../../lib/whatsapp';
+import Wordmark from './Wordmark.astro';
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+
+const nav = site.nav.filter((n) => n.enabled);
+const wa = waLink({});
+---
+<header class="site-header">
+  <div class="container">
+    <div class="bar">
+      <a class="bar__brand" href="/" aria-label={`${site.name} — beranda`}><Wordmark /></a>
+
+      {nav.length > 0 && (
+        <nav class="bar__nav" aria-label="Menu utama">
+          {nav.map((n) => <a class="bar__link" href={n.href}>{n.label}</a>)}
+        </nav>
+      )}
+
+      <div class="bar__actions">
+        <span class="bar__wa-full"><Button variant="whatsapp" size="sm" href={wa} target="_blank" rel="noopener">Hubungi kami</Button></span>
+        <span class="bar__wa-icon"><Button variant="whatsapp" size="sm" iconOnly href={wa} target="_blank" rel="noopener" aria-label="Hubungi kami lewat WhatsApp">Hubungi kami lewat WhatsApp</Button></span>
+        {nav.length > 0 && (
+          <button type="button" class="bar__menu" data-menu-open aria-haspopup="dialog" aria-label="Buka menu">
+            <Icon name="menu" />
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {nav.length > 0 && (
+    <dialog class="sheet" data-menu aria-label="Menu">
+      <div class="sheet__head">
+        <Wordmark />
+        <button type="button" class="bar__menu" data-menu-close aria-label="Tutup menu"><Icon name="close" /></button>
+      </div>
+      <nav aria-label="Menu utama (ponsel)" class="sheet__nav">
+        {nav.map((n) => <a class="sheet__link" href={n.href}>{n.label}</a>)}
+      </nav>
+      <Button variant="whatsapp" size="lg" fullWidth href={wa} target="_blank" rel="noopener">Hubungi kami di WhatsApp</Button>
+    </dialog>
+  )}
+</header>
+
+<style>
+  .site-header {
+    position: sticky; top: 0; z-index: var(--z-header);
+    padding-top: max(var(--space-3), env(safe-area-inset-top));
+    padding-bottom: var(--space-3);
+    pointer-events: none;              /* only the bar itself catches taps */
+  }
+  .bar {
+    pointer-events: auto;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-6);
+    min-height: 56px; padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6);
+    background: var(--surface); border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-raised-sm);
+  }
+  .bar__brand { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
+  .bar__nav { display: flex; gap: var(--space-2); margin-inline: auto; }
+  .bar__link {
+    display: inline-flex; align-items: center; min-height: 44px; padding: var(--space-2) var(--space-4);
+    border: 1px solid transparent; border-radius: var(--radius-pill);
+    color: var(--ink-900); font-weight: var(--weight-bold); font-size: var(--text-14); text-decoration: none;
+    transition: background-color var(--dur-fast) var(--ease);
+  }
+  .bar__link:hover { background: var(--surface-raised); color: var(--brand-700); }
+  .bar__link:active { background: var(--surface-sunken); }
+  .bar__actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+  .bar__nav + .bar__actions { margin-left: 0; }
+  .bar__wa-icon { display: none; }
+  .bar__menu {
+    display: none; align-items: center; justify-content: center;
+    width: 44px; height: 44px; padding: 0;
+    background: var(--surface); color: var(--ink-900);
+    border: 1px solid var(--border-control); border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-raised-sm); cursor: pointer;
+  }
+  .bar__menu:hover { background: var(--surface-raised); }
+  .bar__menu:active { background: var(--surface-sunken); box-shadow: var(--shadow-inset); }
+
+  .sheet {
+    pointer-events: auto; /* header is pointer-events:none; the dialog inherits it otherwise */
+    position: fixed; inset: 0 0 auto 0; margin: 0; width: 100%; max-width: none; max-height: 100dvh; overflow: auto;
+    padding: max(var(--space-4), env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right)) max(var(--space-6), env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+    background: var(--surface); color: var(--ink-900); border: 0;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg); box-shadow: var(--shadow-raised);
+  }
+  .sheet::backdrop { background: var(--scrim); }
+  .sheet__head { display: flex; align-items: center; justify-content: space-between; min-height: 56px; margin-bottom: var(--space-4); }
+  .sheet__nav { display: grid; gap: var(--space-2); margin-bottom: var(--space-6); }
+  .sheet__link {
+    display: flex; align-items: center; min-height: 56px; padding: var(--space-3) var(--space-5);
+    background: var(--surface); border: 1px solid var(--border-control); border-radius: var(--radius);
+    box-shadow: var(--shadow-raised-sm); color: var(--ink-900); font-weight: var(--weight-bold); text-decoration: none;
+  }
+  .sheet__link:active { background: var(--surface-sunken); box-shadow: var(--shadow-inset); }
+
+  @media (max-width: 899px) {
+    .bar__nav { display: none; }
+    .bar__menu { display: inline-flex; }
+    .bar__wa-full { display: none; }
+    .bar__wa-icon { display: inline-flex; }
+    .bar { padding-left: var(--space-5); }
+  }
+  @media (min-width: 900px) { .sheet { display: none !important; } }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-menu]');
+  if (dialog) {
+    document.querySelector('[data-menu-open]')?.addEventListener('click', () => dialog.showModal());
+    dialog.querySelector('[data-menu-close]')?.addEventListener('click', () => dialog.close());
+    // link tap closes; tap on the backdrop (the dialog element itself) closes; Esc is native.
+    dialog.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (t === dialog || t.closest('a')) dialog.close();
+    });
+  }
+</script>

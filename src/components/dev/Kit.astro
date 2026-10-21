@@ -1,0 +1,154 @@
+---
+/** /dev/kit — every component in every state, side by side. `is-hover` / `is-active` / `is-focus` force a state. */
+import Button from '../ui/Button.astro';
+import ArButton from '../ui/ArButton.astro';
+import Chip from '../ui/Chip.astro';
+import SegmentedControl from '../ui/SegmentedControl.astro';
+import Card from '../ui/Card.astro';
+import Well from '../ui/Well.astro';
+import Input from '../ui/Input.astro';
+import Select from '../ui/Select.astro';
+import Badge from '../ui/Badge.astro';
+import Icon from '../ui/Icon.astro';
+
+const variants = ['primary', 'secondary', 'ghost', 'whatsapp'] as const;
+const icons = ['whatsapp','map-pin','clock','mail','cube','ar','image','play','search','chevron','close','copy','menu','parking','utensils','check'];
+const sizes = [4,8,12,16,20,24,32,40,48,64];
+---
+<div class="container kit">
+  <h1>Component kit</h1>
+  <p class="lede">Dev only. Forced states use <code>.is-hover</code>, <code>.is-active</code>, <code>.is-focus</code>. Real hover/press/focus also work.</p>
+
+  <section>
+    <h2>Button</h2>
+    {variants.map((v) => (
+      <div class="row" data-variant={v}>
+        <span class="tag">{v}</span>
+        <Button variant={v}>Default</Button>
+        <Button variant={v} class="is-hover">Hover</Button>
+        <Button variant={v} class="is-active">Pressed</Button>
+        <Button variant={v} class="is-focus">Focus</Button>
+        <Button variant={v} disabled>Disabled</Button>
+        <Button variant={v} loading>Loading</Button>
+        <Button variant={v} size="sm">Small</Button>
+        <Button variant={v} size="lg">Large</Button>
+      </div>
+    ))}
+    <div class="row">
+      <span class="tag">as link</span>
+      <Button href="#kit-link">Link button</Button>
+      <Button href="#kit-link" disabled>Disabled link</Button>
+      <Button variant="secondary" iconOnly icon="copy">Salin</Button>
+      <Button variant="primary" icon="copy">With icon</Button>
+    </div>
+  </section>
+
+  <section>
+    <h2>ArButton</h2>
+    <div class="row">
+      <span class="tag">ar</span>
+      <ArButton>Lihat di ruanganmu</ArButton>
+      <ArButton class="is-hover">Hover</ArButton>
+      <ArButton class="is-active">Pressed</ArButton>
+      <ArButton class="is-focus">Focus</ArButton>
+      <ArButton state="busy">Membuka…</ArButton>
+      <ArButton icon="cube" size="sm">Lihat 3D &amp; AR</ArButton>
+      <ArButton state="hidden">Hidden (nothing renders here)</ArButton>
+    </div>
+    <p class="note">Compare: the AR pill is outlined and never filled, so it never looks like Primary or WhatsApp.</p>
+  </section>
+
+  <section>
+    <h2>Chip</h2>
+    <div class="row">
+      <Chip>Idle</Chip>
+      <Chip class="is-hover">Hover</Chip>
+      <Chip class="is-active">Pressed</Chip>
+      <Chip class="is-focus">Focus</Chip>
+      <Chip selected>Selected</Chip>
+      <Chip disabled>Disabled</Chip>
+    </div>
+  </section>
+
+  <section>
+    <h2>SegmentedControl</h2>
+    <div class="row"><SegmentedControl label="Contoh 3 item" idPrefix="kit3" items={[{value:'3d',label:'3D & AR',icon:'cube'},{value:'foto',label:'Foto',icon:'image'},{value:'video',label:'Video',icon:'play'}]} /></div>
+    <div class="row"><SegmentedControl label="Contoh 2 item" items={[{value:'a',label:'3D & AR'},{value:'b',label:'Foto'}]} /></div>
+    <div class="row"><SegmentedControl label="Contoh 1 item" items={[{value:'a',label:'Foto'}]} /></div>
+    <p class="note" data-seg-out>Pilih tab (klik atau panah kiri/kanan, Home/End). Terakhir dipilih: —</p>
+  </section>
+
+  <section>
+    <h2>Card &amp; Well</h2>
+    <div class="grid">
+      <Card><h3 class="h3s">Card</h3><p>Raised surface, radius-lg.</p></Card>
+      <Card interactive tabindex="0"><h3 class="h3s">Interactive</h3><p>Hover lifts 2px. Pressed = inset.</p></Card>
+      <Card interactive class="is-hover"><h3 class="h3s">Forced hover</h3></Card>
+      <Card interactive class="is-active"><h3 class="h3s">Forced pressed</h3></Card>
+      <Well ratio="4 / 3"><p class="well-text">Well (inset), aspect 4 / 3</p></Well>
+    </div>
+  </section>
+
+  <section>
+    <h2>Input &amp; Select</h2>
+    <div class="grid">
+      <Input id="k-default" label="Default" placeholder="Cari produk…" icon="search" />
+      <Input id="k-focus" label="Focus (forced)" value="Teks" class="is-focus-wrap" />
+      <Input id="k-hint" label="With hint" hint="Contoh: kursi jati" />
+      <Input id="k-err" label="Error" value="abc" error="Format tidak valid." />
+      <Input id="k-warn" label="Warning" value="a@b.id" warning="Email ini sudah dipakai." />
+      <Input id="k-dis" label="Disabled" value="Tidak bisa diubah" disabled />
+      <Select id="s-default" label="Select" options={[{value:'r',label:'Rekomendasi'},{value:'l',label:'Harga terendah'},{value:'h',label:'Harga tertinggi'}]} />
+      <Select id="s-err" label="Select error" error="Pilih salah satu." options={[{value:'',label:'—'},{value:'a',label:'A'}]} />
+      <Select id="s-dis" label="Select disabled" disabled options={[{value:'r',label:'Rekomendasi'}]} />
+    </div>
+  </section>
+
+  <section>
+    <h2>Badge</h2>
+    <div class="row"><Badge variant="promo">Promo −25%</Badge><Badge variant="info">3D</Badge><Badge>Baru</Badge></div>
+  </section>
+
+  <section>
+    <h2>Toast</h2>
+    <div class="row"><Button variant="secondary" data-toast-demo icon="copy">Salin link produk</Button></div>
+    <p class="note">Toast muncul ±3 detik lalu hilang sendiri (aria-live="polite").</p>
+  </section>
+
+  <section>
+    <h2>Icon</h2>
+    <div class="row icons">{icons.map((n) => <span class="ico"><Icon name={n} /><small>{n}</small></span>)}</div>
+  </section>
+
+  <section>
+    <h2>Tokens</h2>
+    <div class="row">{sizes.map((s) => <span class="sw" style={`width:${s}px;height:${s}px`} title={`${s}px`}></span>)}</div>
+    <p class="note">4px grid: 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64.</p>
+  </section>
+</div>
+
+<style>
+  .kit { display: grid; gap: var(--space-12); padding-block: var(--space-10); }
+  .kit > section { display: grid; gap: var(--space-4); }
+  .lede, .note { color: var(--ink-700); font-size: var(--text-14); }
+  code { font-family: inherit; background: var(--surface-sunken); padding: 0 var(--space-1); border-radius: var(--space-1); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+  .tag { min-width: 96px; font-size: var(--text-14); color: var(--ink-700); font-weight: var(--weight-bold); }
+  .grid { display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .h3s { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; margin-bottom: var(--space-2); }
+  .well-text { padding: var(--space-6); color: var(--ink-700); }
+  .icons { gap: var(--space-6); }
+  .ico { display: grid; justify-items: center; gap: var(--space-1); min-width: 72px; color: var(--ink-900); }
+  .ico small { color: var(--ink-700); }
+  .sw { background: var(--brand-700); border-radius: var(--space-1); }
+  .kit :global(.is-focus-wrap .field__input) { outline: 2px solid var(--brand-600); outline-offset: 2px; border-color: var(--brand-600); }
+</style>
+
+<script>
+  import { showToast } from '../../lib/toast';
+  document.querySelector('[data-toast-demo]')?.addEventListener('click', () => showToast('Link disalin'));
+  document.addEventListener('segmented:change', (e) => {
+    const out = document.querySelector('[data-seg-out]');
+    if (out) out.textContent = `Pilih tab (klik atau panah kiri/kanan, Home/End). Terakhir dipilih: ${(e as CustomEvent).detail.value}`;
+  });
+</script>

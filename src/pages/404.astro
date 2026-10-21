@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+---
+<BaseLayout title="Halaman tidak ditemukan — FurniBLOC" description="Halaman yang Anda cari tidak ditemukan." canonicalPath="/404" noindex>
+  <section class="container nf">
+    <h1>Halaman tidak ditemukan</h1>
+    <p>Tautan ini mungkin sudah berubah. Kembali ke beranda untuk melihat koleksi kami.</p>
+    <div><Button href="/">Ke beranda</Button></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { display: grid; gap: var(--space-4); padding-block: var(--space-16); justify-items: start; }
+</style>

@@ -1,0 +1,22 @@
+---
+/**
+ * Badge — flat pill. Never raised. A badge must mean something (promo, new), never decoration (plan A4 rule 8).
+ * Props: variant 'promo' (amber) | 'info' | 'neutral' (brand-tinted, default), class?
+ */
+interface Props { variant?: 'promo' | 'info' | 'neutral'; class?: string }
+const { variant = 'neutral', class: cls } = Astro.props;
+---
+<span class:list={['badge', `badge--${variant}`, cls]}><slot /></span>
+
+<style>
+  .badge {
+    display: inline-flex; align-items: center; gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    font-weight: var(--weight-bold); font-size: var(--text-14); line-height: var(--space-5);
+    white-space: nowrap;
+  }
+  .badge--promo { background: var(--promo-bg); color: var(--promo-ink); }
+  .badge--info { background: var(--info-bg); color: var(--info-ink); }
+  .badge--neutral { background: var(--brand-100); color: var(--brand-900); }
+</style>

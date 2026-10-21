@@ -1,0 +1,23 @@
+{
+  "name": "furnibloc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/check-hex.mjs && astro build",
+    "preview": "astro preview",
+    "check": "node scripts/check-hex.mjs && astro check",
+    "check:assets": "node scripts/check-assets.mjs",
+    "contrast": "node scripts/contrast.mjs"
+  },
+  "dependencies": {
+    "@fontsource/plus-jakarta-sans": "5.3.0",
+    "@google/model-viewer": "3.4.0",
+    "astro": "7.4.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.11",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,115 @@
+---
+/**
+ * Button props:
+ *   variant    'primary' (flat copper) | 'secondary' (raised soft-UI) | 'ghost' (flat, bordered) | 'whatsapp' (flat green)
+ *   size       'sm' | 'md' | 'lg'   (all >= 44px tall; horizontal padding = 2x vertical)
+ *   href       renders <a> instead of <button>
+ *   type       'button' (default) | 'submit' | 'reset'
+ *   disabled   flat, dimmed, not-allowed; never clickable
+ *   loading    spinner replaces nothing (label stays, so no layout shift); click disabled; aria-busy
+ *   fullWidth  stretch to container
+ *   icon       Icon name shown before the label (whatsapp variant defaults to the WhatsApp glyph)
+ *   iconOnly   square button, label goes in aria-label
+ *   class      extra classes. `is-hover` / `is-active` force a state (used by /dev/kit only)
+ * States: default, hover, active/pressed, disabled, focus (global :focus-visible ring), loading.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'whatsapp';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+  icon?: string;
+  iconOnly?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+const { variant = 'primary', size = 'md', href, type = 'button', disabled = false, loading = false,
+  fullWidth = false, icon, iconOnly = false, class: cls, ...rest } = Astro.props;
+
+const inert = disabled || loading;
+const iconName = icon ?? (variant === 'whatsapp' ? 'whatsapp' : undefined);
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, fullWidth && 'btn--full', iconOnly && 'btn--icon', loading && 'is-loading', cls].filter(Boolean).join(' ');
+const Tag = href ? 'a' : 'button';
+const tagProps: Record<string, unknown> = href
+  ? { href: inert ? undefined : href, role: inert ? 'link' : undefined, 'aria-disabled': inert ? 'true' : undefined, tabindex: inert ? -1 : undefined }
+  : { type, disabled: inert };
+---
+<Tag class={classes} aria-busy={loading ? 'true' : undefined} {...tagProps} {...rest}>
+  {iconName && <Icon name={iconName} />}
+  {!iconOnly && <span class="btn__label"><slot /></span>}
+  {iconOnly && <span class="visually-hidden"><slot /></span>}
+  {loading && <span class="btn__spinner" aria-hidden="true"></span>}
+</Tag>
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-3) var(--space-6);   /* 12 / 24: horizontal = 2x vertical */
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    font-family: var(--font);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-16);
+    line-height: var(--space-6);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  }
+  .btn--sm { padding: var(--space-2) var(--space-4); font-size: var(--text-14); }
+  .btn--lg { padding: var(--space-4) var(--space-8); min-height: 56px; }
+  .btn--full { display: flex; width: 100%; }
+  .btn--icon { padding: 0; width: 44px; }
+  .btn--icon.btn--lg { width: 56px; }
+
+  /* primary: flat copper */
+  .btn--primary { background: var(--brand-700); color: var(--white); border-color: var(--brand-800); box-shadow: var(--shadow-flat-cta); }
+  .btn--primary:is(:hover, .is-hover) { background: var(--brand-800); color: var(--white); }
+  .btn--primary:is(:active, .is-active) { background: var(--brand-900); transform: translateY(1px); box-shadow: none; }
+
+  /* secondary: raised soft-UI, pressed = inset */
+  .btn--secondary { background: var(--surface); color: var(--ink-900); border-color: var(--border-control); box-shadow: var(--shadow-raised-sm); }
+  .btn--secondary:is(:hover, .is-hover) { background: var(--surface-raised); color: var(--ink-900); }
+  .btn--secondary:is(:active, .is-active) { background: var(--surface-sunken); box-shadow: var(--shadow-inset); }
+
+  /* ghost: flat with a visible edge */
+  .btn--ghost { background: transparent; color: var(--brand-700); border-color: var(--border-control); }
+  .btn--ghost:is(:hover, .is-hover) { background: var(--brand-50); color: var(--brand-800); }
+  .btn--ghost:is(:active, .is-active) { background: var(--brand-100); }
+
+  /* whatsapp: flat green (the only green on the site) */
+  .btn--whatsapp { background: var(--whatsapp-strong); color: var(--white); border-color: color-mix(in srgb, var(--whatsapp-strong) 70%, black); box-shadow: var(--shadow-flat-cta); }
+  .btn--whatsapp:is(:hover, .is-hover) { background: color-mix(in srgb, var(--whatsapp-strong) 88%, black); color: var(--white); }
+  .btn--whatsapp:is(:active, .is-active) { background: color-mix(in srgb, var(--whatsapp-strong) 75%, black); transform: translateY(1px); box-shadow: none; }
+
+  /* disabled: flat, no shadow, dimmed */
+  .btn:is(:disabled, [aria-disabled='true']) { opacity: .5; cursor: not-allowed; box-shadow: none; transform: none; }
+  .btn--primary:is(:disabled, [aria-disabled='true']):hover { background: var(--brand-700); }
+  .btn--secondary:is(:disabled, [aria-disabled='true']):hover { background: var(--surface); }
+  .btn--ghost:is(:disabled, [aria-disabled='true']):hover { background: transparent; }
+  .btn--whatsapp:is(:disabled, [aria-disabled='true']):hover { background: var(--whatsapp-strong); }
+
+  /* loading: keep the label so nothing shifts, show a spinner on top */
+  .btn.is-loading { cursor: progress; }
+  .btn.is-loading .btn__label, .btn.is-loading :global(svg) { visibility: hidden; }
+  .btn__spinner {
+    position: absolute; inset: 0; margin: auto;
+    width: 20px; height: 20px;
+    border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+    animation: spin 700ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn__spinner { animation: none; border-right-color: currentColor; opacity: .6; } }
+</style>

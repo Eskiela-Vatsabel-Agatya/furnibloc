@@ -1,0 +1,74 @@
+---
+/**
+ * Footer — flat dark-ink surface (not neumorphic). Facts come from site.ts only.
+ * Props: none.
+ */
+import site from '../../data/site';
+import { waLink } from '../../lib/whatsapp';
+import Wordmark from './Wordmark.astro';
+import Icon from '../ui/Icon.astro';
+const nav = site.nav.filter((n) => n.enabled);
+---
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <Wordmark tone="light" />
+        <p>{site.tagline}</p>
+      </div>
+
+      <div>
+        <h2 class="footer__h">Alamat</h2>
+        <address>
+          <Icon name="map-pin" size={24} />
+          <span>{site.address.lines.map((l) => <>{l}<br /></>)}<a href={site.mapsUrl} target="_blank" rel="noopener">Buka di Google Maps</a></span>
+        </address>
+      </div>
+
+      <div>
+        <h2 class="footer__h">Jam buka</h2>
+        <p class="footer__row"><Icon name="clock" size={24} /><span>{site.hours.label}</span></p>
+        <h2 class="footer__h footer__h--gap">Kontak</h2>
+        <p class="footer__row"><Icon name="whatsapp" size={24} /><a href={waLink({})} target="_blank" rel="noopener">{site.whatsapp.display}</a></p>
+        <p class="footer__row"><Icon name="mail" size={24} /><a href={`mailto:${site.email}`}>{site.email}</a></p>
+      </div>
+
+      <div>
+        <h2 class="footer__h">Jelajahi</h2>
+        <ul class="footer__links">
+          {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li><a href={site.brochure} download>Unduh brosur (PDF)</a></li>
+          {site.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener">{s.label}</a></li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© 2026 FurniBLOC</p>
+      <p>{site.credit.href ? <a href={site.credit.href} target="_blank" rel="noopener">{site.credit.text}</a> : site.credit.text}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: var(--space-16);
+    padding: var(--space-12) 0 max(var(--space-8), env(safe-area-inset-bottom));
+    background: var(--ink-900); color: var(--footer-text);
+  }
+  .footer__grid { display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .footer__brand { display: grid; gap: var(--space-3); align-content: start; color: var(--footer-muted); }
+  .footer__h { font-size: var(--text-14); letter-spacing: .08em; text-transform: uppercase; color: var(--footer-muted); line-height: var(--leading-ui); margin-bottom: var(--space-3); }
+  .footer__h--gap { margin-top: var(--space-6); }
+  address, .footer__row { display: flex; gap: var(--space-3); align-items: flex-start; font-style: normal; line-height: var(--space-6); }
+  .footer :global(svg) { flex: none; color: var(--brand-300); }
+  .footer a { color: var(--footer-text); text-decoration-thickness: 1px; }
+  .footer a:hover { color: var(--brand-200); }
+  .footer__links { list-style: none; padding: 0; display: grid; gap: var(--space-1); }
+  .footer__links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .footer__bottom {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2);
+    margin-top: var(--space-10); padding-top: var(--space-6);
+    border-top: 1px solid var(--ink-700); color: var(--footer-muted); font-size: var(--text-14);
+  }
+</style>
