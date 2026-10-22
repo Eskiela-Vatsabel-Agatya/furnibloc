@@ -1,21 +1,13 @@
 ---
-// Phase 1 placeholder: proves the shell and the deploy pipeline. Phase 2 replaces this with Hero + Catalog.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import site from '../data/site';
+import Hero from '../components/hero/Hero.astro';
+import Catalog from '../components/catalog/Catalog.astro';
 ---
 <BaseLayout
   title="FurniBLOC — Showroom Furnitur & Dekorasi di Solo"
-  description="Showroom kolektif furnitur, dekorasi, dan kerajinan kualitas ekspor dari 30 tenant IKM Soloraya di Sriwedari, Surakarta."
+  description="Lihat furnitur ekspor Solo dalam 3D dan coba di ruanganmu dengan AR. Showroom kolektif 30 tenant IKM Soloraya di Sriwedari, Surakarta."
   canonicalPath="/"
 >
-  <section class="container soon">
-    <h1>FurniBLOC</h1>
-    <p>Segera hadir: katalog 3D &amp; AR FurniBLOC</p>
-    <p class="soon__sub">{site.tagline}</p>
-  </section>
+  <Hero />
+  <Catalog />
 </BaseLayout>
-
-<style>
-  .soon { display: grid; gap: var(--space-4); padding-block: var(--space-16); }
-  .soon__sub { color: var(--ink-700); }
-</style>

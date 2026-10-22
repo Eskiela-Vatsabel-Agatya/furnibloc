@@ -5,17 +5,18 @@
  * Props:
  *   state   'hidden' (not rendered visually; no dead tap before the model has loaded) | 'ready' | 'busy'
  *   icon    Icon name, default 'ar' ('cube' for "Lihat 3D & AR" on cards)
- *   href    renders <a> (card use); otherwise <button type="button"> (viewer slot="ar-button")
+ *   href    renders <a>; otherwise <button type="button"> (moved into <model-viewer slot="ar-button"> by the stage script)
+ *   decorative  renders a non-interactive <span> (used inside a stretched-link card, where nesting a control is invalid)
  *   size    'md' | 'sm'
  *   class   extras. `is-hover` / `is-active` force a state (/dev/kit)
  * Scripts toggle `data-state` ('hidden' | 'ready' | 'busy'). States: default, hover, active, disabled (= busy), focus.
  */
 import Icon from './Icon.astro';
-interface Props { state?: 'hidden' | 'ready' | 'busy'; icon?: string; href?: string; size?: 'sm' | 'md'; class?: string; [k: string]: unknown }
-const { state = 'ready', icon = 'ar', href, size = 'md', class: cls, ...rest } = Astro.props;
-const Tag = href ? 'a' : 'button';
+interface Props { state?: 'hidden' | 'ready' | 'busy'; icon?: string; href?: string; size?: 'sm' | 'md'; decorative?: boolean; class?: string; [k: string]: unknown }
+const { state = 'ready', icon = 'ar', href, size = 'md', decorative = false, class: cls, ...rest } = Astro.props;
+const Tag = decorative ? 'span' : href ? 'a' : 'button';
 const busy = state === 'busy';
-const tagProps: Record<string, unknown> = href ? { href: busy ? undefined : href } : { type: 'button', disabled: busy };
+const tagProps: Record<string, unknown> = decorative ? { 'aria-hidden': 'true' } : href ? { href: busy ? undefined : href } : { type: 'button', disabled: busy };
 ---
 <Tag class:list={['ar-btn', `ar-btn--${size}`, cls]} data-state={state} aria-busy={busy ? 'true' : undefined} {...tagProps} {...rest}>
   <Icon name={icon} />

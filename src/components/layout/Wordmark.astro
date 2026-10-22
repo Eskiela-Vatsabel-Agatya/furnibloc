@@ -1,27 +1,48 @@
 ---
 /**
- * Wordmark — uses the real logo if one is dropped at src/assets/brand/logo.(svg|png|webp);
- * otherwise a typographic "FURNI BLOC" wordmark.
- * TEMP: replace with logo (design.md §2.4). No logo file has been supplied yet.
- * Props: tone 'ink' (default, on light) | 'light' (on the dark footer), class?
+ * Wordmark — the FurniBLOC logo.
+ * If src/assets/brand/logo.svg exists it is INLINED (not used as <img>) so that:
+ *   - its CSS variables (--ink-900, --brand-500) resolve from tokens.css,
+ *   - Plus Jakarta Sans (already loaded by the page) renders its subtitle,
+ *   - it can be recolored for the dark footer (tone="light").
+ * Falls back to a typographic wordmark if the file is missing.
+ * Props: tone 'ink' (on light) | 'light' (on dark footer), height (px, default 44), class?
+ * The parent link / wrapper provides the accessible name; the svg itself is aria-hidden.
  */
 import site from '../../data/site';
-interface Props { tone?: 'ink' | 'light'; class?: string }
-const { tone = 'ink', class: cls } = Astro.props;
-const logos = import.meta.glob<{ default: ImageMetadata }>('/src/assets/brand/logo.{svg,png,webp}', { eager: true });
-const logo = Object.values(logos)[0]?.default;
+interface Props { tone?: 'ink' | 'light'; height?: number; class?: string }
+const { tone = 'ink', height = 44, class: cls } = Astro.props;
+
+const raw = Object.values(import.meta.glob<string>('/src/assets/brand/logo.svg', { query: '?raw', import: 'default', eager: true }))[0];
+let svg = '';
+let ratio = 540 / 210;
+if (raw) {
+  const vb = raw.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+  if (vb) ratio = Number(vb[1]) / Number(vb[2]);
+  svg = raw
+    .replace(/<\?xml[^>]*\?>/, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/, '')                    // avoid duplicate ids/titles when used several times
+    .replace(/\s(width|height)="100%"/g, '')
+    .replace(/\saria-labelledby="[^"]*"/, '')
+    .replace(/\srole="img"/, '')
+    .replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
+}
 ---
-{logo ? (
-  <img class:list={['wm-img', cls]} src={logo.src} width={logo.width} height={logo.height} alt={site.name} />
+{svg ? (
+  <span class:list={['wm-logo', `wm-logo--${tone}`, cls]} style={`--h:${height}px;--ratio:${ratio}`} role="img" aria-label={site.name} set:html={svg} />
 ) : (
-  <span class:list={['wm', `wm--${tone}`, cls]} aria-label={site.name}>
+  <span class:list={['wm', `wm--${tone}`, cls]} role="img" aria-label={site.name}>
     <span class="wm__main" aria-hidden="true"><strong>FURNI</strong>BLOC</span>
   </span>
 )}
 
 <style>
-  .wm-img { height: 32px; width: auto; }
-  .wm { display: inline-flex; flex-direction: column; line-height: 1; }
+  .wm-logo { display: inline-block; height: var(--h); aspect-ratio: var(--ratio); line-height: 0; }
+  .wm-logo :global(svg) { width: 100%; height: 100%; display: block; }
+  /* On the dark footer the olive ink would vanish: remap it to the light footer text. */
+  .wm-logo--light { --ink-900: var(--footer-text); }
+  .wm { display: inline-flex; line-height: 1; }
   .wm__main { font-size: var(--text-20); letter-spacing: .12em; font-weight: var(--weight-regular); }
   .wm__main strong { font-weight: var(--weight-bold); }
   .wm--ink { color: var(--ink-900); }

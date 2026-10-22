@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 210" width="100%" height="100%" role="img" aria-labelledby="furnibloc-logo-title">
+  <title id="furnibloc-logo-title">FURNI BLOC — Furniture & Home Decoration</title>
+  <defs>
+    <style>
+      .fb-ink { fill: var(--ink-900, #2F2E17); }
+      .fb-ink-stroke { stroke: var(--ink-900, #2F2E17); fill: none; }
+      .fb-brand { fill: var(--brand-500, #C4812F); }
+      .fb-brand-stroke { stroke: var(--brand-500, #C4812F); fill: none; }
+      .fb-sub {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 500;
+        font-size: 21.5px;
+        letter-spacing: -0.01em;
+      }
+    </style>
+  </defs>
+
+  <!-- ==========================================
+       LEFT ICON MARK: ARCH PILL + LAMP + CHAIR
+       ========================================== -->
+  <g id="icon-mark" transform="translate(8, 8)">
+    <!-- Outer Rounded Pill Frame -->
+    <rect class="fb-ink-stroke" x="6" y="6" width="124" height="182" rx="44" stroke-width="11" stroke-linejoin="round" />
+
+    <!-- Hanging Pendant Lamp (Top Right) -->
+    <!-- Lamp Cord -->
+    <line class="fb-ink-stroke" x1="88" y1="10" x2="88" y2="55" stroke-width="6" stroke-linecap="round" />
+    <!-- Lamp Dome Shade (Copper) -->
+    <path class="fb-brand" d="M 65 81 C 65 62, 111 62, 111 81 Z" />
+    <!-- Lamp Warm Bulb Glow (Olive Peek) -->
+    <path class="fb-ink" d="M 80 83 A 8 6 0 0 0 96 83 Z" />
+
+    <!-- Minimalist Armchair (Bottom Left) -->
+    <!-- Upper Backrest Cushion (Copper) -->
+    <path class="fb-brand" d="M 29 124 L 29 107 C 29 94, 40 88, 57 88 C 74 88, 85 94, 85 107 L 85 124 C 81 124, 78 127, 78 132 L 78 134 L 36 134 L 36 132 C 36 127, 33 124, 29 124 Z" />
+    
+    <!-- Armrests & Lower Frame (Dark Olive) -->
+    <path class="fb-ink-stroke" d="M 22 128 C 29 128, 33 132, 33 139 L 33 147 L 81 147 L 81 139 C 81 132, 85 128, 92 128" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Seat Base Bar -->
+    <path class="fb-ink-stroke" d="M 23 158 L 91 158" stroke-width="8" stroke-linecap="round" />
+    <!-- Chair Legs -->
+    <line class="fb-ink-stroke" x1="34" y1="158" x2="34" y2="171" stroke-width="7.5" stroke-linecap="round" />
+    <line class="fb-ink-stroke" x1="80" y1="158" x2="80" y2="171" stroke-width="7.5" stroke-linecap="round" />
+  </g>
+
+  <!-- ==========================================
+       RIGHT WORDMARK: FURNI / BLOC / SUBTITLE
+       ========================================== -->
+  <!-- LINE 1: "FURNI" (Pure Vector Paths in Dark Olive) -->
+  <g id="wordmark-furni" class="fb-ink" transform="translate(166, 16)">
+    <!-- F -->
+    <path d="M 0 0 H 46 V 13.5 H 15.5 V 25 H 41 V 38 H 15.5 V 64 H 0 Z" />
+    <!-- U -->
+    <path d="M 60 0 H 75.5 V 38 C 75.5 46.5, 81 51, 89.5 51 C 98 51, 103.5 46.5, 103.5 38 V 0 H 119 V 38.5 C 119 55.5, 107 65, 89.5 65 C 72 65, 60 55.5, 60 38.5 Z" />
+    <!-- R (with signature open-loop geometric cut from PDF) -->
+    <path d="M 136 0 H 151.5 V 64 H 136 Z M 156 0 H 169 C 183 0, 192 8.5, 192 20.5 C 192 29.5, 186.5 36.5, 177.5 39.2 L 194 64 H 176.5 L 161.5 40.5 H 156 V 28 H 167.5 C 173 28, 176.5 25, 176.5 20.5 C 176.5 16, 173 13, 167.5 13 H 156 Z" />
+    <!-- N -->
+    <path d="M 209 0 H 223.5 L 253 39.5 V 0 H 268.5 V 64 H 254 L 224.5 24.5 V 64 H 209 Z" />
+    <!-- I -->
+    <path d="M 287 0 H 303 V 64 H 287 Z" />
+  </g>
+
+  <!-- LINE 2: "BLOC" (Pure Vector Paths in Brand Copper) -->
+  <g id="wordmark-bloc" class="fb-brand" transform="translate(166, 94)">
+    <!-- B -->
+    <path d="M 0 0 H 36 C 50.5 0, 59.5 7.5, 59.5 18.5 C 59.5 25.5, 55.5 31, 49 33.5 C 57.5 36, 62.5 42.5, 62.5 51 C 62.5 63, 52.5 70, 36.5 70 H 0 Z M 16.5 13 V 28 H 33.5 C 40 28, 43.5 25, 43.5 20.5 C 43.5 16, 40 13, 33.5 13 Z M 16.5 41 V 57 H 35.5 C 42.5 57, 46.5 54, 46.5 49 C 46.5 44, 42.5 41, 35.5 41 Z" />
+    <!-- L -->
+    <path d="M 79 0 H 96 V 55.5 H 134 V 70 H 79 Z" />
+    <!-- O -->
+    <path d="M 145 35 C 145 14, 160.5 -1.5, 182.5 -1.5 C 204.5 -1.5, 220 14, 220 35 C 220 56, 204.5 71.5, 182.5 71.5 C 160.5 71.5, 145 56, 145 35 Z M 162 35 C 162 47.5, 170.5 56.5, 182.5 56.5 C 194.5 56.5, 203 47.5, 203 35 C 203 22.5, 194.5 13.5, 182.5 13.5 C 170.5 13.5, 162 22.5, 162 35 Z" />
+    <!-- C -->
+    <path d="M 233 35 C 233 14, 248.5 -1.5, 270.5 -1.5 C 286 -1.5, 298.5 6, 304 18.5 L 289 25 C 285.5 17.5, 279 13.5, 270.5 13.5 C 258.5 13.5, 250 22.5, 250 35 C 250 47.5, 258.5 56.5, 270.5 56.5 C 279 56.5, 285.5 52.5, 289 45 L 304 51.5 C 298.5 64, 286 71.5, 270.5 71.5 C 248.5 71.5, 233 56, 233 35 Z" />
+  </g>
+
+  <!-- LINE 3: "Furniture & Home Decoration" -->
+  <text x="166" y="191" class="fb-brand fb-sub">Furniture & Home Decoration</text>
+</svg>

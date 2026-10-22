@@ -1,0 +1,37 @@
+---
+/** /dev/media-states — the proof that design.md §8's four-state table works, using the REAL ProductMedia component. */
+import { fixtures } from '../../data/fixtures';
+import { validateProducts } from '../../lib/products';
+import ProductMedia from '../product/ProductMedia.astro';
+import Card from '../ui/Card.astro';
+validateProducts(fixtures);
+const expect: Record<string, string> = {
+  'photo-model': 'Default 3D & AR (loads the cube), tab "Foto" available. AR pill after load (phone), or "Lihat di HP-mu" (desktop).',
+  'photo-only': 'Standard photo gallery. No tabs at all.',
+  'model-only': 'Direct 3D viewer. No tabs.',
+  'model-missing': 'Model file is absent: falls back to the photo, the "3D & AR" tab is removed, no error text, no stuck spinner.',
+  'model-slow': 'Timeout path (1 ms): 3D never arrives in time, so it falls back to the photo and the tab is removed.',
+};
+---
+<div class="container ms">
+  <h1>Media states</h1>
+  <p class="hint">Dev only. Needs <code>public/model/fixture-cube.glb</code>: run <code>npm run fixtures:glb</code>.</p>
+  <div class="ms__grid">
+    {fixtures.map((f) => (
+      <Card class="ms__card" data-fixture={f.slug}>
+        <h2>{f.name}</h2>
+        <p class="hint">{expect[f.slug]}</p>
+        <ProductMedia product={f} idPrefix={`fx-${f.slug}`} timeoutMs={f.slug === 'model-slow' ? 1 : undefined} />
+      </Card>
+    ))}
+  </div>
+</div>
+
+<style>
+  .ms { padding-block: var(--space-8); display: grid; gap: var(--space-6); }
+  .hint { color: var(--ink-700); font-size: var(--text-14); }
+  code { font-family: inherit; background: var(--surface-sunken); padding: 0 var(--space-1); }
+  .ms__grid { display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  :global(.ms__card) { display: grid; gap: var(--space-3); align-content: start; }
+  :global(.ms__card) h2 { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+</style>

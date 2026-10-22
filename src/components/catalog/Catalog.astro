@@ -1,0 +1,123 @@
+---
+/**
+ * Catalog ("Katalog", #katalog) — directly under the hero.
+ * Progressive disclosure: the toolbar (search, category chips, sort) renders ONLY with >= CATALOG_TOOLBAR_MIN products;
+ * categories shown are only those that exist. Filtering/sorting is a vanilla script over data-* attributes (no network).
+ * Under CATALOG_NOTE_MAX products a CatalogNote card renders next to them. Props: none.
+ */
+import site from '../../data/site';
+import { getProducts, getCategories } from '../../lib/products';
+import { waLink } from '../../lib/whatsapp';
+import Chip from '../ui/Chip.astro';
+import Input from '../ui/Input.astro';
+import Select from '../ui/Select.astro';
+import Button from '../ui/Button.astro';
+import ProductCard from './ProductCard.astro';
+import CatalogNote from './CatalogNote.astro';
+
+const products = getProducts();
+const categories = getCategories();
+const toolbar = products.length >= site.CATALOG_TOOLBAR_MIN;
+const note = products.length < site.CATALOG_NOTE_MAX;
+---
+<section id="katalog" class="catalog" aria-labelledby="katalog-title" data-catalog>
+  <div class="container">
+    <header class="catalog__head">
+      <div>
+        <h2 id="katalog-title">Katalog</h2>
+        <p class="catalog__sub">Ketuk produk untuk melihat detail, 3D, dan AR. Harga dan ketersediaan dikonfirmasi lewat WhatsApp.</p>
+      </div>
+      <p class="catalog__count" role="status" aria-live="polite" data-count>{products.length} produk</p>
+    </header>
+
+    {toolbar && (
+      <div class="toolbar" data-toolbar>
+        <Input id="cat-search" label="Cari produk" type="search" icon="search" placeholder="Cari nama atau kategori…" />
+        <div class="toolbar__chips" role="group" aria-label="Kategori">
+          <Chip selected value="" >Semua</Chip>
+          {categories.map((c) => <Chip value={c}>{c}</Chip>)}
+        </div>
+        <Select id="cat-sort" label="Urutkan" options={[{ value: 'rec', label: 'Rekomendasi' }, { value: 'asc', label: 'Harga terendah' }, { value: 'desc', label: 'Harga tertinggi' }]} />
+      </div>
+    )}
+
+    <ul class="grid" data-grid>
+      {products.map((p, i) => <ProductCard product={p} index={i} />)}
+      {note && <CatalogNote />}
+    </ul>
+
+    <div class="empty" data-empty hidden>
+      <h3>Belum ada produk yang cocok.</h3>
+      <p>Coba kata kunci atau kategori lain, atau tanyakan langsung ke kami.</p>
+      <div class="empty__cta">
+        <Button variant="secondary" size="sm" data-reset>Reset filter</Button>
+        <Button variant="whatsapp" size="sm" href={waLink({})} target="_blank" rel="noopener">Tanya via WhatsApp</Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .catalog { padding-block: var(--space-12); }
+  .catalog__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-8); }
+  .catalog__sub { color: var(--ink-700); max-width: 56ch; margin-top: var(--space-2); }
+  .catalog__count { color: var(--ink-700); font-weight: var(--weight-bold); }
+  .toolbar { display: grid; gap: var(--space-4); margin-bottom: var(--space-8); align-items: end; }
+  .toolbar__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  @media (min-width: 900px) { .toolbar { grid-template-columns: minmax(240px, 1fr) auto 200px; } }
+  .grid { list-style: none; padding: 0; display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .grid :global([hidden]) { display: none; }
+  .empty { display: grid; gap: var(--space-3); justify-items: start; padding: var(--space-8); border: 2px dashed var(--border-control); border-radius: var(--radius-lg); }
+  .empty[hidden] { display: none; }
+  .empty h3 { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+  .empty p { color: var(--ink-700); }
+  .empty__cta { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-catalog]');
+  if (root) {
+    const grid = root.querySelector<HTMLElement>('[data-grid]')!;
+    const cards = [...grid.querySelectorAll<HTMLElement>('[data-card]')];
+    const note = grid.querySelector<HTMLElement>('[data-note]');
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const search = root.querySelector<HTMLInputElement>('#cat-search');
+    const sort = root.querySelector<HTMLSelectElement>('#cat-sort');
+    const chips = [...root.querySelectorAll<HTMLElement>('[data-toolbar] .chip')];
+    let cat = '';
+
+    function apply() {
+      const q = (search?.value ?? '').trim().toLowerCase();
+      const mode = sort?.value ?? 'rec';
+      const num = (el: HTMLElement, k: string) => Number(el.dataset[k]);
+      const shown = cards.filter((c) => {
+        const ok = (!cat || c.dataset.cat === cat) && (!q || (c.dataset.name ?? '').includes(q) || (c.dataset.cat ?? '').toLowerCase().includes(q));
+        c.hidden = !ok;
+        return ok;
+      });
+      const order = [...cards].sort((a, b) =>
+        mode === 'asc' ? num(a, 'price') - num(b, 'price')
+        : mode === 'desc' ? num(b, 'price') - num(a, 'price')
+        : (num(b, 'featured') - num(a, 'featured')) || (num(a, 'index') - num(b, 'index')));   // featured pinned first
+      order.forEach((c) => grid.append(c));
+      if (note) grid.append(note);
+      const filtering = Boolean(q || cat);
+      if (note) note.hidden = filtering && shown.length === 0;
+      empty.hidden = shown.length > 0;
+      count.textContent = `${shown.length} produk`;
+    }
+    search?.addEventListener('input', apply);
+    sort?.addEventListener('change', apply);
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      cat = chip.dataset.value ?? '';
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      apply();
+    }));
+    root.querySelector('[data-reset]')?.addEventListener('click', () => {
+      cat = ''; if (search) search.value = ''; if (sort) sort.value = 'rec';
+      chips.forEach((c, i) => c.setAttribute('aria-pressed', String(i === 0)));
+      apply();
+    });
+  }
+</script>

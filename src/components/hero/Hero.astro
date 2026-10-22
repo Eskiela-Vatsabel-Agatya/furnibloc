@@ -1,0 +1,129 @@
+---
+/**
+ * Hero — AR-first: a window onto the live 3D model, with the catalog directly under it.
+ * Product = first featured with a model, else first with a model, else the first product (getHeroProduct).
+ * States: A live 3D | B model fails -> photo (handled by ModelStage) | C no product has a model -> photo well, no AR |
+ *         D two+ products have models -> switcher chips under the well (only the selected model loads, one viewer).
+ * Phone: headline, then the viewer, then the rest. Props: none.
+ */
+import { getImage } from 'astro:assets';
+import site from '../../data/site';
+import { getHeroProduct, getModelProducts, hasModel } from '../../lib/products';
+import { productPhotos } from '../../lib/assets';
+import { productUrl } from '../../lib/url';
+import { formatRupiah, priceAfterDiscount } from '../../lib/format';
+import { waLink } from '../../lib/whatsapp';
+import Button from '../ui/Button.astro';
+import Chip from '../ui/Chip.astro';
+import Well from '../ui/Well.astro';
+import ModelStage from '../product/ModelStage.astro';
+
+const p = getHeroProduct();
+const modelProducts = getModelProducts();
+const showSwitcher = modelProducts.length >= 2;       // state D
+const showroomOn = site.nav.some((n) => n.label === 'Showroom' && n.enabled);
+
+const photoOf = (x: NonNullable<typeof p>) => productPhotos(x.photoDir ?? x.slug, x.media.photos)[0];
+const thumbs = showSwitcher
+  ? await Promise.all(modelProducts.map(async (x) => {
+      const ph = photoOf(x);
+      const big = ph ? await getImage({ src: ph, width: Math.min(ph.width, 960) }) : undefined;
+      const small = ph ? await getImage({ src: ph, width: Math.min(ph.width, 96) }) : undefined;
+      return { x, big: big?.src, small: small?.src };
+    }))
+  : [];
+---
+{p && (
+  <section class="hero" aria-labelledby="hero-title" data-hero>
+    <div class="container hero__grid">
+      <div class="hero__head">
+        <p class="hero__eyebrow">Showroom furnitur &amp; dekorasi · Solo</p>
+        <h1 id="hero-title">Lihat furnitur ekspor Solo langsung di ruanganmu.</h1>
+      </div>
+
+      <div class="hero__stage">
+        <Well class="hero__well">
+          <ModelStage slug={p.slug} name={p.name} photo={photoOf(p)} glb={hasModel(p) ? p.media.model!.glb : undefined} usdz={p.media.model?.usdz}
+            alt={`${p.name} — ${p.category}`} loading="eager" pageUrl={productUrl(p.slug)} autoRotate idSuffix="-hero" maxWidth={960} />
+        </Well>
+
+        {showSwitcher && (
+          <div class="hero__switch" role="group" aria-label="Pilih produk 3D">
+            {thumbs.map(({ x, small, big }) => (
+              <Chip selected={x.slug === p.slug} data-slug={x.slug} data-name={x.name} data-price={formatRupiah(priceAfterDiscount(x))}
+                data-url={`/produk/${x.slug}`} data-wa={waLink({ product: x })} data-glb={x.media.model!.glb} data-usdz={x.media.model!.usdz ?? ''} data-photo={big ?? ''}>
+                {small && <img src={small} alt="" width="32" height="32" loading="lazy" />}<span>{x.name}</span>
+              </Chip>
+            ))}
+          </div>
+        )}
+
+        <div class="hero__caption">
+          <div>
+            <p class="hero__name" data-hero-name>{p.name}</p>
+            <p class="hero__price" data-hero-price>{formatRupiah(priceAfterDiscount(p))}</p>
+          </div>
+          <div class="hero__caption-actions">
+            <Button variant="ghost" size="sm" href={`/produk/${p.slug}`} data-hero-link>Lihat detail</Button>
+            <Button variant="whatsapp" size="sm" iconOnly href={waLink({ product: p })} target="_blank" rel="noopener" data-hero-wa aria-label={`Tanya ${p.name} lewat WhatsApp`}>Tanya lewat WhatsApp</Button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__body">
+        <p class="hero__sub">Putar produknya dari segala sisi, lalu letakkan di rumahmu lewat kamera HP, sebelum datang ke showroom.</p>
+        <div class="hero__cta">
+          <Button size="lg" href="#katalog">Lihat katalog</Button>
+          {showroomOn && <Button size="lg" variant="secondary" href="#showroom">Kunjungi showroom</Button>}
+        </div>
+        <p class="hero__facts">{site.facts.tenants} tenant · {site.facts.areaM2} m² · Sriwedari, Solo</p>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .hero { padding-block: var(--space-6) var(--space-12); }
+  .hero__grid { display: grid; gap: var(--space-6); grid-template-areas: 'head' 'stage' 'body'; }
+  .hero__head { grid-area: head; display: grid; gap: var(--space-3); }
+  .hero__stage { grid-area: stage; display: grid; gap: var(--space-4); align-content: start; }
+  .hero__body { grid-area: body; display: grid; gap: var(--space-6); align-content: start; }
+  .hero__eyebrow { color: var(--brand-700); font-weight: var(--weight-bold); font-size: var(--text-14); }
+  h1 { font-size: var(--text-42); }
+  .hero__sub { font-size: var(--text-20); line-height: var(--leading-ui); color: var(--ink-700); max-width: 32ch; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .hero__facts { color: var(--ink-700); font-size: var(--text-14); }
+  .hero :global(.hero__well) { aspect-ratio: 1; }
+
+  .hero__switch { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .hero__switch :global(.chip img) { border-radius: var(--space-2); object-fit: contain; }
+  .hero__caption { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .hero__name { font-weight: var(--weight-bold); font-size: var(--text-20); line-height: var(--leading-ui); }
+  .hero__price { color: var(--brand-700); font-weight: var(--weight-bold); }
+  .hero__caption-actions { display: flex; gap: var(--space-2); }
+
+  @media (min-width: 900px) {
+    .hero { padding-block: var(--space-12) var(--space-16); }
+    .hero__grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; grid-template-areas: 'head stage' 'body stage'; column-gap: var(--space-16); }
+    h1 { font-size: var(--text-64); }
+    .hero :global(.hero__well) { aspect-ratio: 4 / 5; }
+  }
+</style>
+
+<script>
+  import { getStage } from '../../lib/stage';
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  hero?.querySelectorAll<HTMLElement>('.hero__switch .chip').forEach((chip) => chip.addEventListener('click', () => {
+    if (chip.getAttribute('aria-pressed') === 'true') return;
+    hero.querySelectorAll('.hero__switch .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+    const stage = hero.querySelector<HTMLElement>('[data-stage]');
+    const s = stage && getStage(stage);
+    const d = chip.dataset;
+    s?.swap({ glb: d.glb!, usdz: d.usdz || undefined, photoSrc: d.photo || undefined, alt: d.name ?? '' });
+    const set = (sel: string, fn: (el: HTMLElement) => void) => { const el = hero.querySelector<HTMLElement>(sel); if (el) fn(el); };
+    set('[data-hero-name]', (el) => (el.textContent = d.name ?? ''));
+    set('[data-hero-price]', (el) => (el.textContent = d.price ?? ''));
+    set('[data-hero-link]', (el) => el.setAttribute('href', d.url ?? '#'));
+    set('[data-hero-wa]', (el) => el.setAttribute('href', d.wa ?? '#'));
+  }));
+</script>

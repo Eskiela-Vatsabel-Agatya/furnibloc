@@ -22,9 +22,9 @@ export function validateProducts(list: Product[]): void {
     const d = p.discountPercent;
     if (d !== undefined && (typeof d !== 'number' || d < 0 || d > 100)) errors.push(`${at}: discountPercent must be between 0 and 100`);
 
-    const onDisk = new Set(photoFilesOnDisk(p.slug));
+    const onDisk = new Set(photoFilesOnDisk(p.photoDir ?? p.slug));
     for (const f of p.media.photos) {
-      if (!onDisk.has(f)) errors.push(`${at}: photo "${f}" not found in src/assets/products/${p.slug}/`);
+      if (!onDisk.has(f)) errors.push(`${at}: photo "${f}" not found in src/assets/products/${p.photoDir ?? p.slug}/`);
     }
 
     const m = p.media.model;
@@ -56,3 +56,12 @@ export function getCategories(): Category[] {
 }
 export const hasModel = (p: Product): boolean => Boolean(p.media.model?.glb);
 export const hasVideo = (p: Product): boolean => Boolean(p.media.video?.src);
+
+/** Hero product: first featured with a model, else first with a model, else the first product. */
+export function getHeroProduct(): Product | undefined {
+  return products.find((p) => p.featured && hasModel(p)) ?? products.find(hasModel) ?? products[0];
+}
+/** Products that can drive the hero switcher (state D needs 2+). */
+export function getModelProducts(): Product[] {
+  return products.filter(hasModel);
+}

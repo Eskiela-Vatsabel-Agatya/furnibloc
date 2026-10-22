@@ -1,0 +1,77 @@
+---
+/**
+ * ProductCard (design.md §8 hierarchy): photo (largest, top) -> category -> name -> price (copper, most prominent) -> actions.
+ * ONE real anchor (the name) is stretched over the whole card; the WhatsApp button sits above it with its own focus ring.
+ * The "Lihat 3D & AR" pill is decorative inside the card (nesting controls is invalid) — the card link does the work.
+ * Never shows stock or the tenant code. Badges only when meaningful: Promo -X% (discount), Baru (isNew), 3D (has a model).
+ * Props: product, index (original order, for sorting)
+ */
+import { Image } from 'astro:assets';
+import type { Product } from '../../data/products';
+import { productPhotos } from '../../lib/assets';
+import { hasModel } from '../../lib/products';
+import { formatRupiah, priceAfterDiscount } from '../../lib/format';
+import { waLink } from '../../lib/whatsapp';
+import Card from '../ui/Card.astro';
+import Well from '../ui/Well.astro';
+import Badge from '../ui/Badge.astro';
+import Button from '../ui/Button.astro';
+import ArButton from '../ui/ArButton.astro';
+
+interface Props { product: Product; index: number }
+const { product: p, index } = Astro.props;
+const photo = productPhotos(p.photoDir ?? p.slug, p.media.photos)[0];
+const w = photo ? Math.min(photo.width, 480) : 0;
+const h = photo ? Math.round((photo.height * w) / photo.width) : 0;
+const final = priceAfterDiscount(p);
+const discount = p.discountPercent ?? 0;
+---
+<Card as="li" interactive style="list-style:none;padding:var(--space-4)" data-card data-cat={p.category} data-price={final} data-featured={p.featured ? '1' : '0'} data-index={index} data-name={p.name.toLowerCase()}>
+  <div class="pcard">
+  <Well class="pcard__well">
+    {photo
+      ? <Image src={photo} width={w} height={h} alt={`${p.name} — ${p.category}`} loading="lazy" decoding="async" />
+      : <span class="pcard__none">Foto segera hadir</span>}
+    <div class="pcard__badges">
+      {discount > 0 && <Badge variant="promo">Promo −{discount}%</Badge>}
+      {p.isNew && <Badge>Baru</Badge>}
+      {hasModel(p) && <Badge variant="info">3D</Badge>}
+    </div>
+  </Well>
+  <div class="pcard__body">
+    <p class="pcard__cat">{p.category}</p>
+    <h3 class="pcard__name"><a class="pcard__link" href={`/produk/${p.slug}`}>{p.name}</a></h3>
+    <p class="pcard__price">
+      {discount > 0 && <s class="pcard__old">{formatRupiah(p.price)}</s>}
+      <span>{formatRupiah(final)}</span>
+    </p>
+    <div class="pcard__actions">
+      {hasModel(p)
+        ? <ArButton decorative icon="cube" size="sm">Lihat 3D &amp; AR</ArButton>
+        : <span class="pcard__detail">Lihat detail</span>}
+      <Button class="pcard__wa" variant="whatsapp" size="sm" iconOnly href={waLink({ product: p })} target="_blank" rel="noopener" aria-label={`Tanya ${p.name} lewat WhatsApp`}>Tanya lewat WhatsApp</Button>
+    </div>
+  </div>
+  </div>
+</Card>
+
+<style>
+  .pcard { display: grid; gap: var(--space-4); align-content: start; }
+  .pcard :global(.pcard__well) { aspect-ratio: 4 / 3; display: grid; place-items: center; }
+  .pcard :global(.pcard__well img) { width: 100%; height: 100%; object-fit: contain; padding: var(--space-3); }
+  .pcard__none { color: var(--ink-700); font-size: var(--text-14); font-weight: var(--weight-bold); }
+  .pcard__badges { position: absolute; top: var(--space-3); left: var(--space-3); display: flex; flex-wrap: wrap; gap: var(--space-1); }
+  .pcard__body { display: grid; gap: var(--space-1); }
+  .pcard__cat { color: var(--ink-700); font-size: var(--text-14); }
+  .pcard__name { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+  .pcard__link { color: var(--ink-900); text-decoration: none; }
+  .pcard__link::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius-lg); }   /* stretched link */
+  .pcard__link:hover { color: var(--brand-700); }
+  .pcard__link:focus-visible { outline: none; }
+  .pcard__link:focus-visible::after { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+  .pcard__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); color: var(--brand-700); font-weight: var(--weight-bold); font-size: var(--text-20); line-height: var(--leading-ui); }
+  .pcard__old { color: var(--ink-700); font-size: var(--text-14); font-weight: var(--weight-regular); }
+  .pcard__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); }
+  .pcard__detail { color: var(--brand-700); font-weight: var(--weight-bold); font-size: var(--text-14); }
+  .pcard :global(.pcard__wa) { position: relative; z-index: 1; }   /* above the stretched link */
+</style>

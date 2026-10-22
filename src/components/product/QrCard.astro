@@ -1,0 +1,39 @@
+---
+/**
+ * QrCard — the product's own QR, a caption, "Unduh QR (SVG)" and "Cetak label" (window.print()).
+ * The printed label itself lives in <PrintLabel> (rendered at body level through BaseLayout's "print" slot).
+ * Props: product
+ */
+import type { Product } from '../../data/products';
+import { productUrl } from '../../lib/url';
+import Card from '../ui/Card.astro';
+import Button from '../ui/Button.astro';
+import QrCode from './QrCode.astro';
+interface Props { product: Product }
+const { product: p } = Astro.props;
+---
+<Card class="qrcard">
+  <QrCode url={productUrl(p.slug)} label={`Kode QR untuk membuka ${p.name}`} size={160} />
+  <div class="qrcard__text">
+    <h2>Bawa ke HP-mu</h2>
+    <p>Pindai untuk membuka produk ini di HP.</p>
+    <div class="qrcard__actions">
+      <Button variant="secondary" size="sm" icon="copy" href={`/qr/${p.slug}.svg`} download={`qr-${p.slug}.svg`}>Unduh QR (SVG)</Button>
+      <Button variant="ghost" size="sm" data-print>Cetak label</Button>
+    </div>
+  </div>
+</Card>
+
+<style>
+  :global(.qrcard) { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; }
+  .qrcard__text { display: grid; gap: var(--space-2); flex: 1 1 200px; }
+  .qrcard__text h2 { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+  .qrcard__text p { color: var(--ink-700); }
+  .qrcard__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+</style>
+
+<script>
+  document.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-print]')) window.print();
+  });
+</script>

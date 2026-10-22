@@ -1,2 +1,30 @@
-<!-- TEMP: replace with the real FurniBLOC mark when logo files are supplied -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#85521E"/><path d="M20 46V18h24v7H28v4h13v7H28v10z" fill="#FFFFFF"/></svg>
+<svg width="196" height="196" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 196" role="img" aria-label="FurniBLOC Icon">
+  <defs>
+    <style>
+      .fb-bg { fill: #F3EBDF; }
+      .fb-ink { fill: #2F2E17; }
+      .fb-ink-stroke { stroke: #2F2E17; fill: none; }
+      .fb-brand { fill: #C4812F; }
+    </style>
+  </defs>
+
+  <!-- Soft Warm Surface Tile -->
+  <rect class="fb-bg" width="196" height="196" rx="44" />
+
+  <g transform="translate(30, 1)">
+    <!-- Outer Rounded Pill Frame -->
+    <rect class="fb-ink-stroke" x="6" y="6" width="124" height="182" rx="44" stroke-width="11" stroke-linejoin="round" />
+
+    <!-- Hanging Pendant Lamp -->
+    <line class="fb-ink-stroke" x1="88" y1="10" x2="88" y2="55" stroke-width="6" stroke-linecap="round" />
+    <path class="fb-brand" d="M 65 81 C 65 62, 111 62, 111 81 Z" />
+    <path class="fb-ink" d="M 80 83 A 8 6 0 0 0 96 83 Z" />
+
+    <!-- Minimalist Armchair -->
+    <path class="fb-brand" d="M 29 124 L 29 107 C 29 94, 40 88, 57 88 C 74 88, 85 94, 85 107 L 85 124 C 81 124, 78 127, 78 132 L 78 134 L 36 134 L 36 132 C 36 127, 33 124, 29 124 Z" />
+    <path class="fb-ink-stroke" d="M 22 128 C 29 128, 33 132, 33 139 L 33 147 L 81 147 L 81 139 C 81 132, 85 128, 92 128" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="fb-ink-stroke" d="M 23 158 L 91 158" stroke-width="8" stroke-linecap="round" />
+    <line class="fb-ink-stroke" x1="34" y1="158" x2="34" y2="171" stroke-width="7.5" stroke-linecap="round" />
+    <line class="fb-ink-stroke" x1="80" y1="158" x2="80" y2="171" stroke-width="7.5" stroke-linecap="round" />
+  </g>
+</svg>

@@ -25,3 +25,7 @@ This is the equivalent of `company.md` §7 ("Special Requirements / Deviations f
 | 2026-10-21 | P1-1 | Phase 1 added `@astrojs/check` and `typescript` (exact-pinned, dev-only) because the plan's own `npm run check` (`astro check`) cannot run without them. |
 | 2026-10-21 | P1-2 | Control borders use `--border-control` (`#A57B45`, 3.2:1 on the surface) instead of copper-300, which measures only 1.56:1 and fails the plan's 3:1 rule. Soft decorative edges use `--border-soft`. |
 | 2026-10-21 | P1-3 | Primary button fill is copper **700**: white on copper-600 measures 4.46:1, just under AA. WhatsApp button fill is a darker green token (`--whatsapp-strong`) because white on `#25D366` is only about 1.9:1. |
+| 2026-10-22 | P2-1 | Phase 2 added the planned `qrcode` dependency (exact-pinned). Its types are declared locally in `src/env.d.ts` instead of adding `@types/qrcode`. |
+| 2026-10-22 | P2-2 | The logo is inlined as SVG (not `<img>`): an `<img>` SVG cannot see page CSS variables or the page font, and the supplied file had `width/height="100%"` (no intrinsic size). `npm run favicons` regenerates a self-contained `public/favicon.svg` plus PNGs from `src/assets/brand/favicon.svg`. |
+| 2026-10-22 | P2-3 | The hero "Kunjungi showroom" button renders only once the Showroom nav item is enabled (Phase 3), so Phase 2 has no dead anchor. |
+| 2026-10-22 | P2-4 | `Product` gained an optional `photoDir` (defaults to `slug`) so dev fixtures can share `src/assets/products/_fixture/`. |

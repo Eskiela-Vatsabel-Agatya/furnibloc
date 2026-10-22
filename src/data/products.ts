@@ -4,6 +4,7 @@ export type Category = 'Furniture' | 'Home Decoration' | 'Craft';
 
 export interface Product {
   slug: string;                 // URL stem AND asset key stem. PERMANENT once a QR may be printed.
+  photoDir?: string;            // photos folder under src/assets/products/ (defaults to slug; fixtures use '_fixture')
   code: string;                 // legacy "No. Produk"
   name: string;
   category: Category;

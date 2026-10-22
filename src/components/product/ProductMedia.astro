@@ -1,0 +1,175 @@
+---
+/**
+ * ProductMedia — the media-priority state machine (design.md §8 / plan 2.4). Used by the product page and /dev/media-states.
+ * Tabs are derived from the DATA: model -> "3D & AR", photos -> "Foto", video -> "Video". A type with no media is NOT rendered
+ * (no disabled tab, no empty panel). One type only -> no tab control at all. Only one panel is visible at a time.
+ * Runtime: a failed/missing 3D asset removes its tab (if other media exist) and falls back, silently.
+ * Props: product, idPrefix (unique per instance), loadingForDefault ('eager' on pages where 3D leads), timeoutMs? (dev fixture)
+ */
+import { getImage } from 'astro:assets';
+import type { Product } from '../../data/products';
+import { productPhotos } from '../../lib/assets';
+import { productUrl } from '../../lib/url';
+import SegmentedControl from '../ui/SegmentedControl.astro';
+import Well from '../ui/Well.astro';
+import Icon from '../ui/Icon.astro';
+import ModelStage from './ModelStage.astro';
+
+interface Props { product: Product; idPrefix: string; timeoutMs?: number }
+const { product: p, idPrefix, timeoutMs } = Astro.props;
+
+const photos = productPhotos(p.photoDir ?? p.slug, p.media.photos);
+const model = p.media.model;
+const video = p.media.video;
+const has3d = Boolean(model?.glb);
+const hasPhotos = photos.length > 0;
+const hasVideo = Boolean(video?.src);
+
+const tabs = [
+  has3d && { value: '3d', label: '3D & AR', icon: 'cube' },
+  hasPhotos && { value: 'foto', label: 'Foto', icon: 'image' },
+  hasVideo && { value: 'video', label: 'Video', icon: 'play' },
+].filter(Boolean) as { value: string; label: string; icon: string }[];
+const def = tabs[0]?.value;
+
+const alt = `${p.name} — ${p.category}`;
+const pageUrl = productUrl(p.slug);
+const mainPhotos = await Promise.all(photos.map((ph) => getImage({ src: ph, width: Math.min(ph.width, 1200) })));
+const poster = mainPhotos[0]?.src;
+const panelId = (v: string) => `${idPrefix}-panel-${v}`;
+const tabId = (v: string) => `${idPrefix}-tab-${v}`;
+---
+<div class="media" data-media data-default={def}>
+  {tabs.length > 1 && <SegmentedControl label="Jenis media produk" idPrefix={idPrefix} items={tabs} value={def} class="media__tabs" />}
+
+  {has3d && (
+    <div class="media__panel" role={tabs.length > 1 ? 'tabpanel' : undefined} id={panelId('3d')} aria-labelledby={tabs.length > 1 ? tabId('3d') : undefined} data-panel="3d" hidden={def !== '3d'}>
+      <Well class="media__well">
+        <ModelStage slug={p.slug} name={p.name} photo={photos[0]} glb={model!.glb} usdz={model!.usdz} alt={alt}
+          loading={def === '3d' ? 'eager' : 'lazy'} pageUrl={pageUrl} timeoutMs={timeoutMs} idSuffix={`-${idPrefix}`} autoRotate />
+      </Well>
+    </div>
+  )}
+
+  {hasPhotos && (
+    <div class="media__panel" role={tabs.length > 1 ? 'tabpanel' : undefined} id={panelId('foto')} aria-labelledby={tabs.length > 1 ? tabId('foto') : undefined} data-panel="foto" hidden={def !== 'foto'}>
+      <div class="gallery">
+        <Well class="media__well gallery__main">
+          {mainPhotos.map((img, i) => (
+            <button type="button" class="gallery__zoom" data-zoom data-index={i} aria-label={`Perbesar foto ${i + 1}`} hidden={i !== 0}>
+              <img src={img.src} width={img.attributes.width} height={img.attributes.height} alt={i === 0 ? alt : `${alt}, foto ${i + 1}`} loading={def === 'foto' && i === 0 ? 'eager' : 'lazy'} decoding="async" />
+            </button>
+          ))}
+        </Well>
+        {mainPhotos.length > 1 && (
+          <div class="gallery__thumbs" role="group" aria-label="Pilih foto">
+            {mainPhotos.map((img, i) => (
+              <button type="button" class="gallery__thumb" data-thumb data-index={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Foto ${i + 1}`}>
+                <img src={img.src} alt="" width="64" height="64" loading="lazy" decoding="async" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <dialog class="lightbox" data-lightbox aria-label="Foto diperbesar">
+        <button type="button" class="lightbox__close" data-lightbox-close aria-label="Tutup"><Icon name="close" /></button>
+        <img src="" alt={alt} />
+      </dialog>
+    </div>
+  )}
+
+  {hasVideo && (
+    <div class="media__panel" role={tabs.length > 1 ? 'tabpanel' : undefined} id={panelId('video')} aria-labelledby={tabs.length > 1 ? tabId('video') : undefined} data-panel="video" hidden={def !== 'video'}>
+      <Well class="media__well"><div class="media__video" data-video-host data-src={video!.src} data-poster={video!.poster ?? poster}></div></Well>
+    </div>
+  )}
+</div>
+
+<style>
+  .media { display: grid; gap: var(--space-4); justify-items: stretch; }
+  .media :global(.media__tabs) { justify-self: start; }
+  .media__panel[hidden] { display: none; }
+  .media :global(.media__well) { aspect-ratio: 1; }
+  @media (min-width: 900px) { .media :global(.media__well) { aspect-ratio: 4 / 5; } }
+
+  .gallery { display: grid; gap: var(--space-4); }
+  @media (min-width: 900px) { .gallery:has(.gallery__thumbs) { grid-template-columns: 1fr auto; align-items: start; } .gallery__thumbs { flex-direction: column; } }
+  .gallery__zoom { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--space-6); background: transparent; border: 0; cursor: zoom-in; }
+  .gallery__zoom[hidden] { display: none; }
+  .gallery__zoom img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }  /* never upscaled past natural size */
+  .gallery__thumbs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .gallery__thumb { width: 64px; height: 64px; min-width: 44px; padding: var(--space-1); background: var(--surface); border: 1px solid var(--border-control);
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-raised-sm); cursor: pointer; }
+  .gallery__thumb img { width: 100%; height: 100%; object-fit: contain; border-radius: var(--space-2); }
+  .gallery__thumb:active { box-shadow: var(--shadow-inset); }
+  .gallery__thumb[aria-pressed='true'] { box-shadow: var(--shadow-inset); background: var(--brand-100); }
+
+  .media__video { position: absolute; inset: 0; display: grid; place-items: center; }
+  .media__video :global(video) { width: 100%; height: 100%; object-fit: contain; background: var(--ink-900); }
+
+  .lightbox { max-width: min(96vw, 1200px); max-height: 96dvh; margin: auto; padding: var(--space-4); background: var(--surface); border: 0; border-radius: var(--radius-lg); }
+  .lightbox::backdrop { background: var(--scrim); }
+  .lightbox img { max-width: 100%; max-height: calc(96dvh - 2 * var(--space-4)); width: auto; height: auto; margin: auto; object-fit: contain; }
+  .lightbox__close { position: absolute; top: var(--space-2); right: var(--space-2); width: 44px; height: 44px; display: grid; place-items: center;
+    background: var(--surface); color: var(--ink-900); border: 1px solid var(--border-control); border-radius: var(--radius-pill); box-shadow: var(--shadow-raised-sm); cursor: pointer; }
+</style>
+
+<script>
+  import { activateStages } from '../../lib/stage';
+
+  document.querySelectorAll<HTMLElement>('[data-media]').forEach((root) => {
+    const panel = (v: string) => root.querySelector<HTMLElement>(`[data-panel="${v}"]`);
+    const tabs = () => root.querySelectorAll<HTMLElement>('[role="tab"]');
+
+    function mountVideo() {
+      const host = root.querySelector<HTMLElement>('[data-video-host]');
+      if (!host || host.querySelector('video')) return;
+      const v = document.createElement('video');
+      v.controls = true; v.playsInline = true; v.preload = 'metadata';
+      if (host.dataset.poster) v.poster = host.dataset.poster;
+      v.addEventListener('error', () => removeMedia('video'), { once: true });
+      v.src = host.dataset.src ?? '';
+      host.append(v);
+    }
+
+    function show(value: string) {
+      root.querySelectorAll<HTMLElement>('[data-panel]').forEach((el) => { el.hidden = el.dataset.panel !== value; });
+      const p = panel(value);
+      if (value === '3d' && p) activateStages(p);
+      if (value === 'video') mountVideo();
+    }
+
+    /** Remove a media type that failed at runtime — only if something else can be shown. */
+    function removeMedia(value: string) {
+      const others = [...root.querySelectorAll<HTMLElement>('[data-panel]')].filter((el) => el.dataset.panel !== value);
+      if (!others.length) return;                                   // sole media: the stage already shows its own fallback
+      const wasVisible = !panel(value)?.hidden;
+      root.querySelector(`[role="tab"][data-value="${value}"]`)?.remove();
+      panel(value)?.remove();
+      const left = tabs();
+      if (left.length <= 1) root.querySelector('[data-segmented]')?.remove();   // a single type needs no control
+      if (wasVisible) {
+        const next = others[0].dataset.panel!;
+        if (left.length > 1) (root.querySelector(`[role="tab"][data-value="${next}"]`) as HTMLElement | null)?.click();
+        else show(next);
+      }
+    }
+
+    root.addEventListener('segmented:change', (e) => show((e as CustomEvent).detail.value));
+    root.addEventListener('stage:failed', () => removeMedia('3d'));
+    if (root.dataset.default === 'video') mountVideo();
+
+    // gallery
+    root.querySelectorAll<HTMLElement>('[data-thumb]').forEach((t) => t.addEventListener('click', () => {
+      root.querySelectorAll<HTMLElement>('[data-thumb]').forEach((o) => o.setAttribute('aria-pressed', String(o === t)));
+      root.querySelectorAll<HTMLElement>('[data-zoom]').forEach((z) => { z.hidden = z.dataset.index !== t.dataset.index; });
+    }));
+    const box = root.querySelector<HTMLDialogElement>('[data-lightbox]');
+    root.querySelectorAll<HTMLElement>('[data-zoom]').forEach((z) => z.addEventListener('click', () => {
+      const img = box?.querySelector('img'); const src = z.querySelector('img')?.currentSrc;
+      if (img && src) { img.src = src; box?.showModal(); }
+    }));
+    box?.querySelector('[data-lightbox-close]')?.addEventListener('click', () => box.close());
+    box?.addEventListener('click', (e) => { if (e.target === box) box.close(); });
+  });
+</script>

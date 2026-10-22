@@ -1,0 +1,39 @@
+---
+/** /dev/qr-sheet — every product's label on an A4 grid (name, code, QR). Open locally, print, cut. Never ships. */
+import { getProducts } from '../../lib/products';
+import { productUrl } from '../../lib/url';
+import { QR_HOST_LABEL } from '../../lib/qr';
+import QrCode from '../product/QrCode.astro';
+const products = getProducts();
+---
+<div class="container sheet">
+  <h1>Lembar label QR</h1>
+  <p class="hint">Dev only. Cetak (Ctrl/Cmd+P), kertas A4, margin default, lalu gunting per label. Setiap QR mengarah ke URL produk di <code>{QR_HOST_LABEL}</code>.</p>
+  <ul class="labels">
+    {products.map((p) => (
+      <li class="lbl">
+        <p class="lbl__name">{p.name}</p>
+        <p class="lbl__code">{p.code}</p>
+        <QrCode url={productUrl(p.slug)} label={`Kode QR untuk membuka ${p.name}`} size={142} />
+        <p class="lbl__host">{QR_HOST_LABEL}</p>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .sheet { padding-block: var(--space-8); display: grid; gap: var(--space-4); }
+  .hint { color: var(--ink-700); }
+  code { font-family: inherit; background: var(--surface-sunken); padding: 0 var(--space-1); }
+  .labels { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5cm, 1fr)); gap: var(--space-4); }
+  .lbl { text-align: center; padding: var(--space-4); border: 1px dashed var(--border-control); break-inside: avoid; display: grid; justify-items: center; gap: var(--space-1); background: var(--white); }
+  .lbl__name { font-weight: var(--weight-bold); }
+  .lbl__code { color: var(--ink-700); font-size: var(--text-14); }
+  .lbl__host { font-weight: var(--weight-bold); font-size: var(--text-14); }
+  .lbl :global(.qr svg) { width: 3.6cm; height: 3.6cm; }
+  @media print {
+    .hint, h1 { display: none; }
+    .sheet { padding: 0; }
+    .labels { grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+/**
+ * PrintLabel — what "Cetak label" prints: name, product code, the QR (6 cm square on paper) and "furnibloc.com".
+ * Hidden on screen. Pass it to BaseLayout through slot="print"; global print CSS hides everything else on the page.
+ * Props: product
+ */
+import type { Product } from '../../data/products';
+import { productUrl } from '../../lib/url';
+import { QR_HOST_LABEL } from '../../lib/qr';
+import QrCode from './QrCode.astro';
+interface Props { product: Product }
+const { product: p } = Astro.props;
+---
+<div class="print-only label">
+  <p class="label__name">{p.name}</p>
+  <p class="label__code">{p.code}</p>
+  <QrCode class="label__qr" url={productUrl(p.slug)} label={`Kode QR untuk membuka ${p.name}`} size={227} />
+  <p class="label__host">{QR_HOST_LABEL}</p>
+</div>
+
+<style is:global>
+  .label { text-align: center; padding: 12mm; }
+  .label__name { font-size: 20pt; font-weight: 700; }
+  .label__code { font-size: 12pt; margin-bottom: 6mm; }
+  .label .label__qr svg { width: 6cm; height: 6cm; margin: 0 auto; }
+  .label__host { font-size: 14pt; margin-top: 4mm; font-weight: 700; }
+</style>

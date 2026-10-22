@@ -51,8 +51,8 @@ const site = {
   facts: { tenants: 30, areaM2: '1.200', opened: '25 Januari 2025' },
 
   nav: [
-    { label: 'Katalog', href: '/#katalog', enabled: false },               // Phase 2
-    { label: 'Lihat di ruanganmu (AR)', href: '/#katalog', enabled: false }, // Phase 2
+    { label: 'Katalog', href: '/#katalog', enabled: true },
+    { label: 'Lihat di ruanganmu (AR)', href: '/#katalog', enabled: true },
     { label: 'Showroom', href: '/#showroom', enabled: false },             // Phase 3
     { label: 'FAQ', href: '/#faq', enabled: false },                       // Phase 3
   ] as NavItem[],

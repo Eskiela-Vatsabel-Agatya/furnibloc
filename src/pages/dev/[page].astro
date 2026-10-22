@@ -1,17 +1,21 @@
 ---
 /**
- * Dev-only pages (/dev/kit now; /dev/media-states and /dev/qr-sheet arrive in Phase 2).
+ * Dev-only pages (/dev/kit, /dev/media-states, /dev/qr-sheet).
  * getStaticPaths returns [] in production builds, so none of these ever ship. All carry noindex.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Kit from '../../components/dev/Kit.astro';
+import MediaStates from '../../components/dev/MediaStates.astro';
+import QrSheet from '../../components/dev/QrSheet.astro';
 
 export function getStaticPaths() {
   if (import.meta.env.PROD) return [];
-  return [{ params: { page: 'kit' } }];
+  return ['kit', 'media-states', 'qr-sheet'].map((page) => ({ params: { page } }));
 }
 const { page } = Astro.params;
 ---
 <BaseLayout title="Dev — Component kit" description="Component kit (dev only)" canonicalPath={`/dev/${page}`} noindex>
   {page === 'kit' && <Kit />}
+  {page === 'media-states' && <MediaStates />}
+  {page === 'qr-sheet' && <QrSheet />}
 </BaseLayout>

@@ -1,0 +1,25 @@
+---
+/**
+ * CatalogNote — flat dashed card shown next to products when there are fewer than CATALOG_NOTE_MAX, so a one-product
+ * launch does not look abandoned. Props: none.
+ */
+import site from '../../data/site';
+import { waLink } from '../../lib/whatsapp';
+import Button from '../ui/Button.astro';
+---
+<li class="note" data-note>
+  <h3>Koleksi lengkap ada di showroom.</h3>
+  <p>Ada {site.facts.tenants} tenant dengan furnitur, dekorasi, dan kerajinan kualitas ekspor di {site.facts.areaM2} m². Tanyakan produk yang kamu cari.</p>
+  <div class="note__cta">
+    <Button variant="whatsapp" size="sm" href={waLink({})} target="_blank" rel="noopener">Tanya via WhatsApp</Button>
+    <Button variant="ghost" size="sm" icon="map-pin" href={site.mapsUrl} target="_blank" rel="noopener">Lihat lokasi</Button>
+  </div>
+</li>
+
+<style>
+  .note { list-style: none; display: grid; gap: var(--space-3); align-content: center; padding: var(--space-6);
+    border: 2px dashed var(--border-control); border-radius: var(--radius-lg); background: transparent; }
+  .note h3 { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+  .note p { color: var(--ink-700); }
+  .note__cta { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+</style>

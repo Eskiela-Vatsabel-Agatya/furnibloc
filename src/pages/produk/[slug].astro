@@ -1,0 +1,144 @@
+---
+/**
+ * Product page /produk/<slug>. Media left (state machine in ProductMedia), info right; stacked on phones, media first.
+ * Per-page <title>/description from the product. A product's slug is permanent once its QR may be printed.
+ */
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import site from '../../data/site';
+import type { Product } from '../../data/products';
+import { getProducts, getProduct } from '../../lib/products';
+import { productPhotos } from '../../lib/assets';
+import { productUrl } from '../../lib/url';
+import { formatRupiah, priceAfterDiscount } from '../../lib/format';
+import { waLink } from '../../lib/whatsapp';
+import ProductMedia from '../../components/product/ProductMedia.astro';
+import QrCard from '../../components/product/QrCard.astro';
+import PrintLabel from '../../components/product/PrintLabel.astro';
+import ProductCard from '../../components/catalog/ProductCard.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import Icon from '../../components/ui/Icon.astro';
+
+export function getStaticPaths() {
+  return getProducts().map((p) => ({ params: { slug: p.slug }, props: { slug: p.slug } }));
+}
+const { slug } = Astro.props;
+const p = getProduct(slug) as Product;
+const all = getProducts();
+const others = all.filter((x) => x.slug !== p.slug).slice(0, 3);
+const final = priceAfterDiscount(p);
+const discount = p.discountPercent ?? 0;
+const url = productUrl(p.slug);
+const photo = productPhotos(p.photoDir ?? p.slug, p.media.photos)[0];
+const og = photo ? (await getImage({ src: photo, width: Math.min(photo.width, 1200) })).src : undefined;
+const description = p.description ?? `${p.name}, ${p.category}${p.material ? ` dari ${p.material}` : ''}. Lihat dalam 3D dan coba di ruanganmu dengan AR. Showroom FurniBLOC, Solo.`;
+const d = p.dimensions;
+const specs: [string, string][] = [
+  p.material && ['Bahan', p.material],
+  d && ['Ukuran', `${d.w} × ${d.d} × ${d.h} ${d.unit}`],     // no axis labels (unit and order are VERIFY)
+  p.color && ['Warna', p.color],
+  ['Kode produk', p.code],
+  p.tenant && ['Tenant', p.tenant],
+].filter(Boolean) as [string, string][];
+---
+<BaseLayout title={`${p.name} — FurniBLOC`} description={description} canonicalPath={`/produk/${p.slug}`} image={og}>
+  <PrintLabel slot="print" product={p} />
+
+  <article class="container pp">
+    <a class="pp__back" href="/#katalog"><Icon name="chevron" size={20} class="pp__back-icon" /> Katalog</a>
+
+    <div class="pp__grid">
+      <div class="pp__media"><ProductMedia product={p} idPrefix="pm" /></div>
+
+      <div class="pp__info">
+        <header class="pp__head">
+          <p class="pp__eyebrow">{p.category}</p>
+          <h1>{p.name}</h1>
+          <div class="pp__price">
+            {discount > 0 && <s>{formatRupiah(p.price)}</s>}
+            <strong>{formatRupiah(final)}</strong>
+            {discount > 0 && <Badge variant="promo">Promo −{discount}%</Badge>}
+          </div>
+          <p class="pp__note">Harga dan ketersediaan dikonfirmasi lewat WhatsApp.</p>
+        </header>
+
+        {p.description && <p class="pp__desc">{p.description}</p>}
+
+        <dl class="pp__specs">
+          {specs.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+
+        <div class="pp__cta">
+          <Button variant="whatsapp" size="lg" fullWidth href={waLink({ product: p })} target="_blank" rel="noopener">Tanya via WhatsApp</Button>
+          <Button variant="secondary" fullWidth icon="copy" data-copy data-url={url}>Salin link produk</Button>
+        </div>
+
+        <QrCard product={p} />
+
+        <Card class="pp__visit">
+          <h2>Lihat langsung di showroom</h2>
+          <p>{site.address.oneLine}</p>
+          <p>{site.hours.label}</p>
+          <div><Button variant="ghost" size="sm" icon="map-pin" href={site.mapsUrl} target="_blank" rel="noopener">Buka di Maps</Button></div>
+        </Card>
+      </div>
+    </div>
+
+    {others.length >= 2 && (
+      <section class="pp__more" aria-labelledby="more-title">
+        <h2 id="more-title">Produk lainnya</h2>
+        <ul class="pp__more-grid">{others.map((x, i) => <ProductCard product={x} index={i} />)}</ul>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .pp { display: grid; gap: var(--space-6); padding-block: var(--space-6) var(--space-12); }
+  .pp__back { display: inline-flex; align-items: center; min-height: 44px; font-weight: var(--weight-bold); text-decoration: none; }
+  .pp__back :global(.pp__back-icon) { transform: rotate(180deg); }
+  .pp__grid { display: grid; gap: var(--space-8); }
+  .pp__info { display: grid; gap: var(--space-6); align-content: start; }
+  .pp__head { display: grid; gap: var(--space-2); }
+  .pp__eyebrow { color: var(--brand-700); font-weight: var(--weight-bold); font-size: var(--text-14); }
+  h1 { font-size: var(--text-42); }
+  .pp__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); color: var(--brand-700); }
+  .pp__price strong { font-size: var(--text-32); letter-spacing: var(--tracking-display); line-height: var(--leading-display); }
+  .pp__price s { color: var(--ink-700); }
+  .pp__note { color: var(--ink-700); font-size: var(--text-14); }
+  .pp__desc { color: var(--ink-700); }
+  .pp__specs { display: grid; gap: 0; margin: 0; border-top: 1px solid var(--border-soft); }
+  .pp__specs div { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-soft); }
+  .pp__specs dt { color: var(--ink-700); }
+  .pp__specs dd { margin: 0; font-weight: var(--weight-bold); text-align: right; }
+  .pp__cta { display: grid; gap: var(--space-3); }
+  .pp :global(.pp__visit) { display: grid; gap: var(--space-2); }
+  .pp :global(.pp__visit) h2 { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+  .pp :global(.pp__visit) p { color: var(--ink-700); }
+  .pp__more { display: grid; gap: var(--space-6); margin-top: var(--space-8); }
+  .pp__more-grid { list-style: none; padding: 0; display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  @media (min-width: 900px) {
+    .pp__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-12); }
+    h1 { font-size: var(--text-64); }
+  }
+</style>
+
+<script>
+  import { showToast } from '../../lib/toast';
+  document.querySelector<HTMLElement>('[data-copy]')?.addEventListener('click', async (e) => {
+    const url = (e.currentTarget as HTMLElement).dataset.url ?? location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const t = document.createElement('textarea');           // fallback for non-secure contexts / old browsers
+      t.value = url; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.append(t); t.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch { /* ignore */ }
+      t.remove();
+      if (!ok) return showToast('Tidak bisa menyalin otomatis. Salin dari bilah alamat.');
+    }
+    showToast('Link disalin');
+  });
+</script>

@@ -9,12 +9,15 @@
     "preview": "astro preview",
     "check": "node scripts/check-hex.mjs && astro check",
     "check:assets": "node scripts/check-assets.mjs",
-    "contrast": "node scripts/contrast.mjs"
+    "contrast": "node scripts/contrast.mjs",
+    "favicons": "node scripts/make-favicons.mjs",
+    "fixtures:glb": "node scripts/make-fixture-glb.mjs"
   },
   "dependencies": {
     "@fontsource/plus-jakarta-sans": "5.3.0",
     "@google/model-viewer": "3.4.0",
-    "astro": "7.4.1"
+    "astro": "7.4.1",
+    "qrcode": "1.5.4"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.11",

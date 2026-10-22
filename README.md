@@ -19,6 +19,8 @@ npm run dev        # http://localhost:4321   (component kit: /dev/kit)
 | `npm run check` | Hex check + `astro check` (types) |
 | `npm run check:assets` | Warns about `R2()` files missing from `public/model/` or `public/video/` |
 | `npm run contrast` | Prints WCAG contrast ratios for the token pairs that matter |
+| `npm run favicons` | Regenerates `public/favicon.svg`, `favicon-32.png`, `apple-touch-icon.png` from `src/assets/brand/favicon.svg` |
+| `npm run fixtures:glb` | Writes `public/model/fixture-cube.glb` (a tiny cube) for `/dev/media-states` |
 
 ## Where 3D models and videos go
 
@@ -32,6 +34,18 @@ video: { src: R2('bed-side-panel.mp4') },      // optional
 ```
 
 `R2()` builds the full URL (`/model/…` in dev, `https://ar.furnibloc.com/model/…` in production). Names: lowercase, letters/digits/`.`/`-`/`_` only, no spaces. A bad name fails the build.
+
+## Brand files
+
+`src/assets/brand/logo.svg` is inlined by the Wordmark component. `src/assets/brand/favicon.svg` is the favicon source; run `npm run favicons` after changing it.
+
+## Dev-only pages (never shipped)
+
+`/dev/kit` (components), `/dev/media-states` (the four media states; run `npm run fixtures:glb` first), `/dev/qr-sheet` (A4 sheet of every product's QR label).
+
+## QR codes
+
+Every product page shows its QR, `/qr/<slug>.svg` is a downloadable file, and the QR always encodes `https://www.furnibloc.com/produk/<slug>`. Never rename a slug once labels may be printed.
 
 ## Adding a product
 
