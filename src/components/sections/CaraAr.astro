@@ -1,0 +1,41 @@
+---
+/**
+ * Cara pakai AR (#cara-ar) — three steps and the honest device note. Props: none.
+ * Steps mirror the real flow: product page -> "Lihat di ruanganmu" -> point the camera at the floor.
+ */
+import SectionHead from './SectionHead.astro';
+import Card from '../ui/Card.astro';
+import Icon from '../ui/Icon.astro';
+const steps = [
+  { icon: 'cube', title: 'Pilih produk', text: 'Buka produk di katalog, lalu pilih tab "3D & AR". Putar produknya dari segala sisi.' },
+  { icon: 'ar', title: 'Ketuk "Lihat di ruanganmu"', text: 'Izinkan kamera saat diminta. Tidak ada aplikasi yang perlu dipasang.' },
+  { icon: 'image', title: 'Letakkan di lantai', text: 'Arahkan kamera ke lantai, tunggu sebentar, lalu geser produk ke posisi yang kamu mau.' },
+];
+---
+<section id="cara-ar" class="sec" aria-labelledby="cara-ar-title">
+  <div class="container">
+    <SectionHead id="cara-ar-title" title="Cara pakai AR" sub="Coba furnitur di rumahmu sebelum datang ke showroom." />
+    <ol class="steps">
+      {steps.map((s, i) => (
+        <li>
+          <Card class="step">
+            <span class="step__n" aria-hidden="true">{i + 1}</span>
+            <Icon name={s.icon} size={28} />
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+          </Card>
+        </li>
+      ))}
+    </ol>
+    <p class="note">AR berfungsi di iPhone dan Android terbaru. Di komputer, pindai kode QR di halaman produk untuk membukanya di HP.</p>
+  </div>
+</section>
+<style>
+  .sec { padding-block: var(--space-12); }
+  .steps { list-style: none; padding: 0; display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .step { display: grid; gap: var(--space-3); height: 100%; align-content: start; }
+  .step h3 { font-size: var(--text-20); line-height: var(--leading-ui); letter-spacing: 0; }
+  .step p { color: var(--ink-700); }
+  .step__n { font-weight: var(--weight-bold); color: var(--brand-700); font-size: var(--text-14); }
+  .note { margin-top: var(--space-6); color: var(--ink-700); max-width: 64ch; }
+</style>

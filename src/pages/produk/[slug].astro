@@ -5,6 +5,7 @@
  */
 import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { productLd } from '../../lib/seo';
 import site from '../../data/site';
 import type { Product } from '../../data/products';
 import { getProducts, getProduct } from '../../lib/products';
@@ -43,7 +44,7 @@ const specs: [string, string][] = [
   p.tenant && ['Tenant', p.tenant],
 ].filter(Boolean) as [string, string][];
 ---
-<BaseLayout title={`${p.name} — FurniBLOC`} description={description} canonicalPath={`/produk/${p.slug}`} image={og}>
+<BaseLayout title={`${p.name} — FurniBLOC`} description={description} canonicalPath={`/produk/${p.slug}`} image={og} jsonLd={[productLd(p, og, description)]}>
   <PrintLabel slot="print" product={p} />
 
   <article class="container pp">

@@ -2,12 +2,25 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/hero/Hero.astro';
 import Catalog from '../components/catalog/Catalog.astro';
+import CaraAr from '../components/sections/CaraAr.astro';
+import Showroom from '../components/sections/Showroom.astro';
+import Floorplan from '../components/sections/Floorplan.astro';
+import Tentang from '../components/sections/Tentang.astro';
+import Faq from '../components/sections/Faq.astro';
+import { furnitureStoreLd, faqLd } from '../lib/seo';
+import { faq } from '../data/faq';
 ---
 <BaseLayout
   title="FurniBLOC — Showroom Furnitur & Dekorasi di Solo"
   description="Lihat furnitur ekspor Solo dalam 3D dan coba di ruanganmu dengan AR. Showroom kolektif 30 tenant IKM Soloraya di Sriwedari, Surakarta."
   canonicalPath="/"
+  jsonLd={[furnitureStoreLd('/og-default.png'), faqLd(faq)]}
 >
   <Hero />
   <Catalog />
+  <CaraAr />
+  <Showroom />
+  <Floorplan />
+  <Tentang />
+  <Faq />
 </BaseLayout>

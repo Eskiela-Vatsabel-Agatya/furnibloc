@@ -1,1 +1,10 @@
-# Slug renames need a redirect here once a QR label may have been printed. Format: /produk/old-slug /produk/new-slug 301
+# Cloudflare Pages redirects (one rule per line: /from /to [status]).
+# Keep this file for the cutover (docs/INFRA_RUNBOOK.md, step 3.9): old furnibloc.com URLs that people may still use.
+# We do not know the old URLs yet, so none are listed. Template:
+#
+#   /old-page          /                 301
+#   /katalog-lama      /#katalog         301
+#
+# Rules:
+#  - /FB.pdf must stay reachable: it is cited publicly and the brochure viewer link depends on it. Never redirect it.
+#  - If a product slug is ever renamed after its QR was printed, add:  /produk/old-slug  /produk/new-slug  301

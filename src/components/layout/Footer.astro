@@ -37,7 +37,7 @@ const nav = site.nav.filter((n) => n.enabled);
         <h2 class="footer__h">Jelajahi</h2>
         <ul class="footer__links">
           {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
-          <li><a href={site.brochure} download>Unduh brosur (PDF)</a></li>
+          <li><a href={site.brochure} target="_blank" rel="noopener">Lihat brosur (PDF)</a></li>
           {site.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener">{s.label}</a></li>)}
         </ul>
       </div>

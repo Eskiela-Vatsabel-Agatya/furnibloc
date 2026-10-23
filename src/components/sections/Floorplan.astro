@@ -1,0 +1,120 @@
+---
+/**
+ * Denah showroom (#denah) — Lt 2, redrawn from the brochure's "LAYOUT FURNI BLOC" page, orientation kept
+ * (A column left with A7 on top, E column right with E6 on top and KASIR under E1, islands B/C/D in the middle,
+ * PANGGUNG at the top, LIFT above-left, void with stair wings and the culinary strip below; the north arrow "U" points DOWN).
+ * Booths are focusable <g> elements: hover / focus / click / Enter selects one and fills the live caption.
+ * Booth data: src/data/booths.ts (add `tenant` there to show names). Props: none.
+ */
+import SectionHead from './SectionHead.astro';
+import { booths, boothByCode, BOOTH_SIZE } from '../../data/booths';
+
+const AX = 37, AW = 38, AY = 128, AH = 36;
+const EX = 237, EW = 40;
+const IW = 35, IY = 162, IH = 34;
+const islands: [string, number][] = [['B', 90], ['C', 138], ['D', 187]];
+
+type Cell = { code: string; x: number; y: number; w: number; h: number };
+const cells: Cell[] = [];
+for (let i = 0; i < 7; i++) cells.push({ code: `A${7 - i}`, x: AX, y: AY + i * AH, w: AW, h: AH });
+for (let i = 0; i < 6; i++) cells.push({ code: `E${6 - i}`, x: EX, y: AY + i * AH, w: EW, h: AH });
+for (const [l, x] of islands) for (let i = 0; i < 6; i++) cells.push({ code: `${l}${6 - i}`, x, y: IY + i * IH, w: IW, h: IH });
+const label = (c: string) => { const b = boothByCode(c); return b?.tenant ? `${c} · ${b.tenant}` : `Booth ${c}`; };
+---
+<section id="denah" class="sec" aria-labelledby="denah-title" data-floorplan>
+  <div class="container">
+    <SectionHead id="denah-title" title="Denah showroom" sub={`Lantai 2. ${booths.length} booth, masing-masing ${BOOTH_SIZE}. Ketuk booth untuk melihat kodenya.`} />
+    <div class="wrap">
+      <svg viewBox="0 0 320 520" role="group" aria-label="Denah lantai 2 FurniBLOC" class="fp">
+        <!-- north arrow: U points DOWN in the brochure -->
+        <g class="muted-line" aria-hidden="true"><path d="M14 92v40M9 124l5 8 5-8" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></g>
+        <text x="14" y="84" class="lbl" text-anchor="middle" aria-hidden="true">U</text>
+
+        <rect x="100" y="14" width="120" height="44" rx="6" class="zone" aria-hidden="true" />
+        <text x="160" y="33" class="lbl" text-anchor="middle" aria-hidden="true">PANGGUNG</text>
+        <text x="160" y="48" class="lbl lbl--s" text-anchor="middle" aria-hidden="true">14,5 × 7,5 m</text>
+
+        <rect x="37" y="30" width="44" height="28" rx="6" class="zone" aria-hidden="true" />
+        <text x="59" y="48" class="lbl" text-anchor="middle" aria-hidden="true">LIFT</text>
+
+        <rect x="37" y="76" width="240" height="364" rx="10" class="outline" aria-hidden="true" />
+        <text x="157" y="100" class="lbl" text-anchor="middle" aria-hidden="true">MEZANIN</text>
+
+        <!-- void with stair wings -->
+        <path d="M82 392 Q157 372 232 392 L232 428 Q157 408 82 428 Z" class="zone" aria-hidden="true" />
+        <text x="157" y="415" class="lbl" text-anchor="middle" aria-hidden="true">VOID</text>
+
+        <rect x="37" y="448" width="240" height="40" rx="10" class="zone" aria-hidden="true" />
+        <text x="157" y="472" class="lbl" text-anchor="middle" aria-hidden="true">FURNI BLOC CULINARY AREA</text>
+
+        <text transform="translate(26 280) rotate(-90)" class="lbl lbl--s" text-anchor="middle" aria-hidden="true">BALKON</text>
+        <text transform="translate(292 280) rotate(90)" class="lbl lbl--s" text-anchor="middle" aria-hidden="true">BALKON</text>
+
+        <rect x={EX} y={AY + 6 * AH} width={EW} height={AH} class="zone" aria-hidden="true" />
+        <text x={EX + EW / 2} y={AY + 6 * AH + AH / 2 + 3} class="lbl lbl--s" text-anchor="middle" aria-hidden="true">KASIR</text>
+
+        {cells.map((c) => (
+          <g class="booth" tabindex="0" role="button" data-code={c.code} aria-label={label(c.code)}>
+            <rect x={c.x} y={c.y} width={c.w} height={c.h} rx="3" />
+            <text x={c.x + c.w / 2} y={c.y + c.h / 2 + 4} text-anchor="middle">{c.code}</text>
+          </g>
+        ))}
+      </svg>
+      <div class="side">
+        <p class="cap" role="status" aria-live="polite" data-cap>Pilih booth di denah.</p>
+        <ul class="legend">
+          <li><span class="sw sw--booth"></span> Booth tenant</li>
+          <li><span class="sw sw--zone"></span> Area umum (panggung, lift, kasir, kuliner)</li>
+        </ul>
+        <p class="legend__note">Ukuran setiap booth {BOOTH_SIZE}. Denah tidak berskala.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sec { padding-block: var(--space-12); }
+  .wrap { display: grid; gap: var(--space-8); align-items: start; }
+  @media (min-width: 900px) { .wrap { grid-template-columns: minmax(0, 420px) 1fr; } }
+  .fp { width: 100%; max-width: 420px; height: auto; display: block; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: var(--shadow-raised); }
+  .lbl { font: var(--weight-bold) 8px var(--font); fill: var(--ink-700); }
+  .lbl--s { font-size: 7px; font-weight: var(--weight-regular); }
+  .muted-line { stroke: var(--ink-700); }
+  .zone { fill: var(--surface-sunken); stroke: var(--border-soft); stroke-width: 1; }
+  .outline { fill: none; stroke: var(--border-control); stroke-width: 1.5; }
+  .booth { cursor: pointer; outline: none; }
+  .booth rect { fill: var(--brand-100); stroke: var(--border-control); stroke-width: 1; transition: fill var(--dur-fast) var(--ease); }
+  .booth text { font: var(--weight-bold) 10px var(--font); fill: var(--ink-900); pointer-events: none; }
+  .booth:hover rect { fill: var(--brand-200); }
+  .booth:focus-visible rect { stroke: var(--ink-900); stroke-width: 3; }
+  .booth.is-selected rect { fill: var(--brand-700); stroke: var(--brand-900); }
+  .booth.is-selected text { fill: var(--white); }
+  .side { display: grid; gap: var(--space-4); }
+  .cap { font-size: var(--text-20); font-weight: var(--weight-bold); min-height: 2lh; }
+  .legend { list-style: none; padding: 0; display: grid; gap: var(--space-2); color: var(--ink-700); }
+  .legend li { display: flex; gap: var(--space-2); align-items: center; }
+  .sw { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--border-control); flex: none; }
+  .sw--booth { background: var(--brand-100); }
+  .sw--zone { background: var(--surface-sunken); border-color: var(--border-soft); }
+  .legend__note { color: var(--ink-700); font-size: var(--text-14); }
+</style>
+
+<script>
+  import { booths } from '../../data/booths';
+  const root = document.querySelector('[data-floorplan]');
+  if (root) {
+    const cap = root.querySelector<HTMLElement>('[data-cap]')!;
+    const els = [...root.querySelectorAll<SVGGElement>('.booth')];
+    const text = (code: string) => { const b = booths.find((x) => x.code === code); return b?.tenant ? `Booth ${code} · ${b.tenant}` : `Booth ${code}`; };
+    const select = (el: SVGGElement) => {
+      els.forEach((x) => x.classList.toggle('is-selected', x === el));
+      const code = el.dataset.code!;
+      cap.textContent = `${text(code)}, ${code.startsWith('A') ? 'kolom kiri' : code.startsWith('E') ? 'kolom kanan' : 'blok tengah'}.`;
+    };
+    els.forEach((el) => {
+      el.addEventListener('click', () => select(el));
+      el.addEventListener('focus', () => select(el));
+      el.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); select(el); } });
+    });
+  }
+</script>

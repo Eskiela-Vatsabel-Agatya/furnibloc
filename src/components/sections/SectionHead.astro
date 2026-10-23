@@ -1,0 +1,13 @@
+---
+/** SectionHead — shared heading block for the home sections. Props: id (heading id), title, sub?. */
+interface Props { id: string; title: string; sub?: string }
+const { id, title, sub } = Astro.props;
+---
+<header class="sh">
+  <h2 id={id}>{title}</h2>
+  {sub && <p class="sh__sub">{sub}</p>}
+</header>
+<style>
+  .sh { margin-bottom: var(--space-8); }
+  .sh__sub { color: var(--ink-700); max-width: 60ch; margin-top: var(--space-2); }
+</style>

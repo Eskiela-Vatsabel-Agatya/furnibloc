@@ -1,0 +1,37 @@
+---
+/**
+ * FAQ (#faq) — every entry in src/data/faq.ts renders (confirmed and provisional). Native <details> accordion.
+ * Each answer carries a WhatsApp button prefilled with the question. Emits FAQPage JSON-LD from the home page. Props: none.
+ */
+import { faq } from '../../data/faq';
+import { waLink } from '../../lib/whatsapp';
+import SectionHead from './SectionHead.astro';
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+---
+<section id="faq" class="sec" aria-labelledby="faq-title">
+  <div class="container">
+    <SectionHead id="faq-title" title="Pertanyaan umum" />
+    <div class="list">
+      {faq.map((e) => (
+        <details class="item">
+          <summary><span>{e.q}</span><Icon name="chevron" size={20} class="chev" /></summary>
+          <div class="ans">
+            <p>{e.a}</p>
+            <Button size="sm" variant="whatsapp" href={waLink({ topic: e.q })} target="_blank" rel="noopener">Tanya lewat WhatsApp</Button>
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+<style>
+  .sec { padding-block: var(--space-12); }
+  .list { display: grid; gap: var(--space-3); max-width: 760px; }
+  .item { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius); box-shadow: var(--shadow-raised-sm); }
+  summary { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); min-height: 48px; padding: var(--space-3) var(--space-5); cursor: pointer; font-weight: var(--weight-bold); list-style: none; border-radius: var(--radius); }
+  summary::-webkit-details-marker { display: none; }
+  summary :global(.chev) { flex: none; transition: transform var(--dur-fast) var(--ease); transform: rotate(90deg); }
+  .item[open] summary :global(.chev) { transform: rotate(-90deg); }
+  .ans { display: grid; gap: var(--space-3); justify-items: start; padding: 0 var(--space-5) var(--space-5); color: var(--ink-700); }
+</style>

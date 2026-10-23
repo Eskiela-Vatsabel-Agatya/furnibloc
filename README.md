@@ -49,7 +49,7 @@ Every product page shows its QR, `/qr/<slug>.svg` is a downloadable file, and th
 
 ## Adding a product
 
-Edit `src/data/products.ts` and add the photo under `src/assets/products/<slug>/`. Full guide: [`docs/ADDING_PRODUCTS.md`](docs/ADDING_PRODUCTS.md) (written in Phase 3). A product's `slug` is permanent once a QR label may have been printed.
+Edit `src/data/products.ts` and add the photo under `src/assets/products/<slug>/`. Full guide: [`docs/ADDING_PRODUCTS.md`](docs/ADDING_PRODUCTS.md). A product's `slug` is permanent once a QR label may have been printed.
 
 ## Branches and deploys
 
@@ -59,4 +59,20 @@ Edit `src/data/products.ts` and add the photo under `src/assets/products/<slug>/
 
 ## Docs
 
-`docs/DECISIONS.md` lists the deliberate deviations from LunAR's DNA files.
+- `docs/DECISIONS.md`: deliberate deviations from LunAR's DNA files, and the decision log.
+- `docs/INFRA_RUNBOOK.md`: click-by-click Cloudflare setup, cutover, rollback, tests and launch gates (for the human).
+- `docs/QA_CHECKLIST.md`: design.md §12 and security.md §10 as pass / N/A / deviation.
+- `docs/ADDING_PRODUCTS.md`: how a teammate adds a product.
+- `infra/worker/index.js`: the R2 proxy Worker source (deployed separately in the Cloudflare dashboard; no root wrangler config).
+
+## Content to confirm with the client
+
+Every unconfirmed fact is tagged `VERIFY` in its data file: `src/data/site.ts` (hours, promo, social links), `src/data/faq.ts` (7 provisional answers; `npm run build` prints the list). Floor-plan tenant names go in `src/data/booths.ts`. The promo bar appears when `site.promo` is set.
+
+## Skipping a Cloudflare build
+
+A commit message starting with `[CI Skip]` (also `[CI-Skip]`, `[Skip CI]`, `[Skip-CI]`, `[CF-Pages-Skip]`, case-insensitive) makes Cloudflare Pages skip that build. Check the Pages docs if it stops working.
+
+## Social card
+
+`public/og-default.png` is a TEMP card. Regenerate with `npm run og`, or replace the file with a designed 1200×630 image.

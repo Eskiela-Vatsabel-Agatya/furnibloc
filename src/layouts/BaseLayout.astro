@@ -6,6 +6,7 @@
  *  canonicalPath  path starting with "/" ("/" for home), joined to astro `site`
  *  image?         absolute or site-relative OG image URL (Phase 3 supplies the real one)
  *  noindex?       adds robots noindex (dev pages)
+ *  jsonLd?        array of JSON-LD objects (see src/lib/seo.ts)
  */
 import '../styles/global.css';
 import site from '../data/site';
@@ -15,6 +16,8 @@ import Footer from '../components/layout/Footer.astro';
 import PromoBar from '../components/layout/PromoBar.astro';
 import Toast from '../components/ui/Toast.astro';
 import tokensCss from '../styles/tokens.css?raw';
+import BackToTop from '../components/layout/BackToTop.astro';
+import { ldJson } from '../lib/seo';
 
 interface Props {
   title: string;
@@ -22,8 +25,9 @@ interface Props {
   canonicalPath?: string;
   image?: string;
   noindex?: boolean;
+  jsonLd?: unknown[];
 }
-const { title, description, canonicalPath = '/', image, noindex = false } = Astro.props;
+const { title, description, canonicalPath = '/', image = '/og-default.png', noindex = false, jsonLd = [] } = Astro.props;
 
 const origin = Astro.site ?? new URL(site.url);
 const canonical = new URL(canonicalPath, origin).toString();
@@ -55,6 +59,7 @@ const assetBase = (import.meta.env.PUBLIC_ASSET_BASE ?? '').replace(/\/$/, '');
     <meta name="twitter:description" content={description} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
+    {jsonLd.map((o) => <script type="application/ld+json" set:html={ldJson(o)} />)}
     {assetBase && <link rel="preconnect" href={assetBase} crossorigin />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -75,6 +80,7 @@ const assetBase = (import.meta.env.PUBLIC_ASSET_BASE ?? '').replace(/\/$/, '');
     </main>
     <Footer />
     <slot name="print" />
+    <BackToTop />
     <Toast />
   </body>
 </html>

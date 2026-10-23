@@ -1,0 +1,66 @@
+---
+/**
+ * Kunjungi showroom (#showroom) — facts, address, hours and a KEYLESS map that loads only when it nears the viewport
+ * (iframe loading="lazy", no API key, no script). Props: none. All facts come from site.ts.
+ */
+import site from '../../data/site';
+import SectionHead from './SectionHead.astro';
+import Card from '../ui/Card.astro';
+import Icon from '../ui/Icon.astro';
+import Button from '../ui/Button.astro';
+import { waLink } from '../../lib/whatsapp';
+
+const query = encodeURIComponent(site.address.oneLine.replace(/ /g, ' '));
+const embed = `https://maps.google.com/maps?q=${query}&z=16&output=embed`;
+const facts = [
+  { icon: 'star', title: 'Showroom permanen', text: `${site.facts.tenants} tenant IKM Soloraya di satu atap, ${site.facts.areaM2} m².` },
+  { icon: 'map-pin', title: 'Lokasi strategis', text: 'Dekat Museum Radya Pustaka, Museum Keris, Museum Batik Danar Hadi, Taman Segaran, Kampung Batik Laweyan dan Kauman, Pasar Klewer, dan Pasar Gede.' },
+  { icon: 'parking', title: 'Parkir luas', text: 'Area parkir luas untuk mobil dan bus.' },
+  { icon: 'utensils', title: 'Area kuliner', text: 'Area kuliner FurniBLOC Culinary Area di mezanin.' },
+  { icon: 'lift', title: 'Lift', text: 'Lift tersedia untuk memuat barang ke lantai 2.' },
+  { icon: 'check', title: 'Kualitas ekspor', text: 'Furnitur, dekorasi, dan kerajinan dengan standar ekspor.' },
+];
+---
+<section id="showroom" class="sec" aria-labelledby="showroom-title">
+  <div class="container">
+    <SectionHead id="showroom-title" title="Kunjungi showroom" sub="Lihat dan sentuh langsung produknya." />
+    <div class="grid">
+      <div class="info">
+        <Card class="addr">
+          <h3>Alamat</h3>
+          <address>{site.address.lines.map((l) => <span>{l}</span>)}</address>
+          <p class="hours"><Icon name="clock" size={20} /> {site.hours.label}</p>
+          <div class="cta">
+            <Button href={site.mapsUrl} target="_blank" rel="noopener" icon="map-pin">Buka di Google Maps</Button>
+            <Button variant="whatsapp" href={waLink({ topic: 'berkunjung ke showroom' })} target="_blank" rel="noopener">Tanya lewat WhatsApp</Button>
+          </div>
+        </Card>
+        <ul class="facts">
+          {facts.map((f) => (
+            <li><Icon name={f.icon} size={24} /><div><h3>{f.title}</h3><p>{f.text}</p></div></li>
+          ))}
+        </ul>
+      </div>
+      <div class="map">
+        <iframe src={embed} title={`Peta lokasi ${site.name}`} loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="600" height="450"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  .sec { padding-block: var(--space-12); }
+  .grid { display: grid; gap: var(--space-8); align-items: start; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } .map { position: sticky; top: calc(var(--header-h) + var(--space-4)); } }
+  .info { display: grid; gap: var(--space-6); }
+  .addr { display: grid; gap: var(--space-3); }
+  .addr h3, .facts h3 { font-size: var(--text-16); line-height: var(--leading-ui); letter-spacing: 0; }
+  address { font-style: normal; display: grid; gap: var(--space-1); }
+  .hours { display: flex; gap: var(--space-2); align-items: center; font-weight: var(--weight-bold); }
+  .cta { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-2); }
+  .facts { list-style: none; padding: 0; display: grid; gap: var(--space-4); }
+  .facts li { display: flex; gap: var(--space-4); align-items: start; color: var(--brand-700); }
+  .facts p { color: var(--ink-700); }
+  .facts h3 { color: var(--ink-900); }
+  .map { border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: var(--shadow-raised); overflow: hidden; background: var(--surface-sunken); aspect-ratio: 4 / 3; }
+  .map iframe { width: 100%; height: 100%; border: 0; display: block; }
+</style>

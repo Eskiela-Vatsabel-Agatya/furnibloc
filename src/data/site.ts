@@ -8,7 +8,6 @@
 export interface NavItem {
   label: string;
   href: string;
-  /** Phase 2 turns on Katalog (+ AR link); Phase 3 turns on Showroom and FAQ. */
   enabled: boolean;
 }
 
@@ -20,19 +19,24 @@ const site = {
 
   address: {
     lines: [
-      'Gedung Graha Wisata Niaga Lt 2',
+      'Gedung Graha Wisata Niaga Lt\u00A02',
       'Jl. Slamet Riyadi No. 275, Sriwedari, Laweyan',
       'Surakarta, Jawa Tengah 57141',
     ],
-    oneLine: 'Gedung Graha Wisata Niaga Lt 2, Jl. Slamet Riyadi No. 275, Sriwedari, Laweyan, Surakarta, Jawa Tengah 57141',
+    oneLine: 'Gedung Graha Wisata Niaga Lt\u00A02, Jl. Slamet Riyadi No. 275, Sriwedari, Laweyan, Surakarta, Jawa Tengah 57141',
   },
+  /** Structured parts for JSON-LD (same facts as `lines`). */
+  addressParts: { street: 'Jl. Slamet Riyadi No. 275', locality: 'Surakarta', region: 'Jawa Tengah', postalCode: '57141', country: 'ID' },
   /** Google Maps *search* URL built from the address. No API key. */
   get mapsUrl() {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.address.oneLine)}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.address.oneLine.replace(/\u00A0/g, ' '))}`;
   },
 
   // VERIFY: opening hours come from a secondary source in the overview docx. Confirm with the client.
-  hours: { label: 'Setiap hari, 09.00–17.00 WIB' },
+  // `confirmed` stays false until then: structured data (JSON-LD openingHours) is only emitted when it is true.
+  hours: { label: 'Setiap hari, 09.00–17.00 WIB', confirmed: false },
+  /** Only set when the client gives coordinates; JSON-LD omits geo while null. */
+  geo: null as null | { lat: number; lng: number },
 
   // Management line (Ifah). The web-portal number 0813 9884 2698 is intentionally not used (plan A2).
   whatsapp: { number: '6285293158665', display: '0852 9315 8665' },
@@ -46,15 +50,18 @@ const site = {
 
   credit: { text: 'Website oleh LunAR', href: '' }, // no link until a URL is given
 
-  brochure: '/FB.pdf', // file itself is added in Phase 3
+  // The brochure opens in Google's PDF viewer (human's choice). It fetches furnibloc.com/FB.pdf, so it works once
+  // the domain points at this site. `brochureFile` is the old public URL that must keep working (cited in press).
+  brochure: 'https://docs.google.com/viewerng/viewer?url=https://www.furnibloc.com/FB.pdf',
+  brochureFile: '/FB.pdf',
 
   facts: { tenants: 30, areaM2: '1.200', opened: '25 Januari 2025' },
 
   nav: [
     { label: 'Katalog', href: '/#katalog', enabled: true },
-    { label: 'Lihat di ruanganmu (AR)', href: '/#katalog', enabled: true },
-    { label: 'Showroom', href: '/#showroom', enabled: false },             // Phase 3
-    { label: 'FAQ', href: '/#faq', enabled: false },                       // Phase 3
+    { label: 'Lihat di ruanganmu (AR)', href: '/#cara-ar', enabled: true },
+    { label: 'Showroom', href: '/#showroom', enabled: true },
+    { label: 'FAQ', href: '/#faq', enabled: true },
   ] as NavItem[],
 
   // Phase 2 catalog behaviour (progressive disclosure).

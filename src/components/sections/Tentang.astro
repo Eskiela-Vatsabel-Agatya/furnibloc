@@ -1,0 +1,26 @@
+---
+/** Tentang FurniBLOC (#tentang) — short, shopper-facing. Facts from site.ts and the company overview. Props: none. */
+import site from '../../data/site';
+import SectionHead from './SectionHead.astro';
+import Button from '../ui/Button.astro';
+const materials = ['Kayu jati', 'Kayu suar', 'Rotan', 'Bambu', 'Tembaga', 'Kaca artistik', 'Gerabah'];
+---
+<section id="tentang" class="sec" aria-labelledby="tentang-title">
+  <div class="container">
+    <SectionHead id="tentang-title" title="Tentang FurniBLOC" />
+    <div class="body">
+      <p>FurniBLOC adalah showroom kolektif furnitur, dekorasi rumah, dan kerajinan dari {site.facts.tenants} tenant IKM Soloraya. Sejak dibuka pada {site.facts.opened}, kami menghadirkan karya pengrajin lokal berkualitas ekspor di satu tempat, di Graha Wisata Niaga, Sriwedari, Surakarta.</p>
+      <p>Setiap produk dibuat oleh pengrajin Soloraya dengan bahan alami dan keahlian turun-temurun. Lihat dulu dalam 3D dan AR di website ini, lalu datang dan rasakan langsung di showroom.</p>
+      <ul class="mats" aria-label="Bahan">
+        {materials.map((m) => <li>{m}</li>)}
+      </ul>
+      <div><Button variant="secondary" href={site.brochure} target="_blank" rel="noopener">Lihat brosur (PDF)</Button></div>
+    </div>
+  </div>
+</section>
+<style>
+  .sec { padding-block: var(--space-12); }
+  .body { display: grid; gap: var(--space-4); max-width: 68ch; }
+  .mats { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .mats li { padding: var(--space-1) var(--space-4); background: var(--surface-sunken); border: 1px solid var(--border-soft); border-radius: var(--radius-pill); font-size: var(--text-14); font-weight: var(--weight-bold); color: var(--ink-700); }
+</style>

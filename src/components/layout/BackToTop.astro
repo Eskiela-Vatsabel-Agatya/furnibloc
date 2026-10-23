@@ -1,0 +1,28 @@
+---
+/** BackToTop — unobtrusive; appears only after scrolling about two screens (the home page is long, product pages are not). Props: none. */
+import Icon from '../ui/Icon.astro';
+---
+<button type="button" class="btt" data-btt hidden aria-label="Kembali ke atas"><Icon name="chevron" class="btt__icon" /></button>
+
+<style>
+  .btt {
+    position: fixed; right: max(var(--space-4), env(safe-area-inset-right)); bottom: max(var(--space-4), env(safe-area-inset-bottom)); z-index: var(--z-header);
+    width: 48px; height: 48px; display: grid; place-items: center; padding: 0;
+    background: var(--surface); color: var(--ink-900); border: 1px solid var(--border-control); border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-raised-sm); cursor: pointer; transition: background-color var(--dur-fast) var(--ease);
+  }
+  .btt[hidden] { display: none; }
+  .btt :global(.btt__icon) { transform: rotate(-90deg); }
+  .btt:hover { background: var(--surface-raised); }
+  .btt:active { background: var(--surface-sunken); box-shadow: var(--shadow-inset); }
+  @media print { .btt { display: none !important; } }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-btt]');
+  if (btn) {
+    const update = () => { btn.hidden = scrollY < innerHeight * 2; };
+    addEventListener('scroll', update, { passive: true }); update();
+    btn.addEventListener('click', () => scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+  }
+</script>
