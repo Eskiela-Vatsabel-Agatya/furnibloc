@@ -33,7 +33,7 @@ model: R2Model('bed-side-panel'),              // bed-side-panel.glb + .usdz
 video: { src: R2('bed-side-panel.mp4') },      // optional
 ```
 
-`R2()` builds the full URL (`/model/…` in dev, `https://ar.furnibloc.com/model/…` in production). Names: lowercase, letters/digits/`.`/`-`/`_` only, no spaces. A bad name fails the build.
+`R2()` builds the full URL (`/model/…` in dev; in production `https://furnibloc-3d-asset.lunarcreativa.workers.dev/<file>`, files at the bucket root). Names: lowercase, letters/digits/`.`/`-`/`_` only, no spaces. A bad name fails the build.
 
 ## Brand files
 

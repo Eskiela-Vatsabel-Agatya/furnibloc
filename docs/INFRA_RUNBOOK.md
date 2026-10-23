@@ -12,7 +12,8 @@ SOPs are referenced by step number and not repeated:
 |---|---|
 | R2 bucket | `furnibloc-3d-asset` |
 | Worker | `furnibloc-3d` |
-| Worker custom domain | `ar.furnibloc.com` |
+| Worker URL (**in use now**) | `https://furnibloc-3d-asset.lunarcreativa.workers.dev` |
+| Worker custom domain (optional, later) | `ar.furnibloc.com` |
 | Worker binding variable | `MY_BUCKET` (must be exactly this: the source uses `env.MY_BUCKET`) |
 | Pages project | `furnibloc` (any name; it becomes `<name>.pages.dev`) |
 | Production site | `https://www.furnibloc.com` (apex `furnibloc.com` redirects to it) |
@@ -45,10 +46,10 @@ In the dashboard, with the client's account selected:
 1. ☐ Left sidebar → **R2 Object Storage** → **Create bucket**. Name: `furnibloc-3d-asset`. Location: Automatic. Create.
 2. ☐ **Do not** turn on the public `r2.dev` URL (some Indonesian ISPs block it, and the site never uses it).
 3. ☐ Open the bucket → **Objects** → **Upload**. Upload the **prepared** files (see launch gate G1: decimated shell, logo baked in, never the raw model) so the object keys are exactly:
-   - `model/bed-side-panel.glb`
-   - `model/bed-side-panel.usdz`
-   Keys are lowercase and case-sensitive. To create the `model/` folder, type `model/` as the folder name in the upload dialog (or upload the folder).
-4. ☐ Videos later go under `video/` (same rules).
+   - `bed-side-panel.glb`
+   - `bed-side-panel.usdz`
+   Files go at the **root** of the bucket (no folder). Keys are lowercase and case-sensitive.
+4. ☐ Videos later go at the root too (same rules).
 
 ## 4. Worker and the R2 binding
 
@@ -70,7 +71,7 @@ In the dashboard, with the client's account selected:
 | Build command | `npm run build` |
 | Build output directory | `dist` |
 | Root directory | `/` |
-| Environment variable (**Production and Preview**) | `PUBLIC_ASSET_BASE` = `https://ar.furnibloc.com` |
+| Environment variable (**Production and Preview**) | `PUBLIC_ASSET_BASE` = `https://furnibloc-3d-asset.lunarcreativa.workers.dev` (switch to `https://ar.furnibloc.com` if the custom domain is added later) |
 | Node version | The repo has `.nvmrc` (22). If the build log shows an older Node, add `NODE_VERSION` = `22` |
 
 4. ☐ Save and deploy. Open the first build log and confirm there are **no "Functions" or "bindings" lines** (there is no `functions/` folder and no root `wrangler.*` on purpose).
@@ -104,13 +105,13 @@ Everything in sections 8a–8c must pass **before** the cutover.
 ### 8a. Worker curl tests (record the output in the report)
 ```bash
 # allowed origin: ACAO echoes it
-curl -sI -H "Origin: https://www.furnibloc.com" https://ar.furnibloc.com/model/bed-side-panel.glb | grep -i -E "HTTP|access-control|content-type|accept-ranges"
+curl -sI -H "Origin: https://www.furnibloc.com" https://ar.furnibloc.com/bed-side-panel.glb | grep -i -E "HTTP|access-control|content-type|accept-ranges"
 # foreign origin: NO access-control-allow-origin header
-curl -sI -H "Origin: https://evil.example" https://ar.furnibloc.com/model/bed-side-panel.glb | grep -i access-control || echo "no ACAO (correct)"
+curl -sI -H "Origin: https://evil.example" https://ar.furnibloc.com/bed-side-panel.glb | grep -i access-control || echo "no ACAO (correct)"
 # range request: 206
-curl -s -o /dev/null -w "%{http_code}\n" -H "Range: bytes=0-99" https://ar.furnibloc.com/model/bed-side-panel.glb
+curl -s -o /dev/null -w "%{http_code}\n" -H "Range: bytes=0-99" https://ar.furnibloc.com/bed-side-panel.glb
 # usdz content type: model/vnd.usdz+zip
-curl -sI https://ar.furnibloc.com/model/bed-side-panel.usdz | grep -i content-type
+curl -sI https://ar.furnibloc.com/bed-side-panel.usdz | grep -i content-type
 # bad key: 404
 curl -s -o /dev/null -w "%{http_code}\n" --path-as-is https://ar.furnibloc.com/../secret
 ```
@@ -125,7 +126,7 @@ Expected: 200 + `access-control-allow-origin: https://www.furnibloc.com` + `mode
 - ☐ Floor plan and FAQ readable at phone width.
 
 ### 8c. Failure paths
-- ☐ In R2, rename `model/bed-side-panel.glb` → the page falls back to the photo with **no error text and no stuck loader**. Rename it back.
+- ☐ In R2, rename `bed-side-panel.glb` → the page falls back to the photo with **no error text and no stuck loader**. Rename it back.
 - ☐ In devtools, block `ar.furnibloc.com` → same result.
 
 ### 8d. Lighthouse (mobile, throttled), record the numbers
@@ -174,7 +175,7 @@ Expected: 200 + `access-control-allow-origin: https://www.furnibloc.com` + `mode
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Model never loads, console shows a CORS error | The Pages host is missing from the Worker's allowed origins, or `___` was not replaced | Section 6, redeploy the Worker |
-| Worker returns 404 for a file that exists | Key mismatch (case, folder, extension) | Keys must be exactly `model/<name>.glb` etc., lowercase |
+| Worker returns 404 for a file that exists | Key mismatch (case, folder, extension) | Keys must be exactly `<name>.glb` etc. at the bucket root, lowercase |
 | Worker 500 / "env.MY_BUCKET undefined" | Binding variable not named exactly `MY_BUCKET` | Section 4, step 3 |
 | Pages build uses an old Node | `.nvmrc` ignored | Add `NODE_VERSION` = `22` |
 | `ar.` works on Wi-Fi but not on mobile data | Something still points at `r2.dev` | Search the build for `r2.dev`; it must never appear |

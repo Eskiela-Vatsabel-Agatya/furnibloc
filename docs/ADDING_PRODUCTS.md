@@ -18,7 +18,7 @@ For a teammate who is not a developer. About 15 minutes per product, plus the 3D
    | `media.photos` | **File names** inside the folder from step 1, e.g. `['1.jpg', '2.jpg']`. |
 3. **3D and video, by file name only.** `model: R2Model('chair')` (means `chair.glb` + `chair.usdz`), or `R2('chair.glb')` / `R2('chair.usdz')`, and `video: { src: R2('chair.mp4') }`. Declaring them makes the "3D & AR" and "Video" tabs appear. Keep names **lowercase with no spaces**, since R2 names are case-sensitive.
 4. **Prepare the 3D files (human step).** Decimate to a hollow shell and bake the logo/watermark into the texture (`security.md` §6). Never use the raw/manufacturing model. Name them `<name>.glb` and `<name>.usdz`.
-5. **Upload to R2** (Cloudflare dashboard → R2 → the bucket → Upload) under `model/` (and `video/`) with **exactly** the names used in `R2()`: for example `model/chair.glb`.
+5. **Upload to R2** (Cloudflare dashboard → R2 → the bucket → Upload) at the **root** of the bucket (no folder) with **exactly** the names used in `R2()`: for example `chair.glb`. It is then served at `https://furnibloc-3d-asset.lunarcreativa.workers.dev/chair.glb`.
 6. **Test locally.** Copy the files to `public/model/` (and `public/video/`), run `npm run dev`, open the product. Then run `npm run check:assets`: it warns about any `R2()` file that is missing locally. (These two folders are git-ignored.)
 7. **QR labels.** Every product gets a QR code automatically (`/qr/<slug>.svg`, and on its page). To print showroom labels: `npm run dev`, open `/dev/qr-sheet`, print.
 8. **Ship.** Open a pull request from a feature branch, check the preview URL (3D and AR on a real phone), then merge to `main`. `main` is production.

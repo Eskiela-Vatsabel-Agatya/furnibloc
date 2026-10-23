@@ -7,7 +7,8 @@ const FOLDER: Record<string, 'model' | 'video'> = {
 const NAME_OK = /^[a-z0-9][a-z0-9._-]*$/i; // same rule the Worker enforces
 
 /**
- * R2('Chair.glb') -> https://ar.furnibloc.com/model/Chair.glb   (dev: /model/Chair.glb)
+ * R2('chair.glb') -> <PUBLIC_ASSET_BASE>/chair.glb   (production: files sit at the ROOT of the bucket/Worker)
+ *                  -> /model/chair.glb                 (dev, PUBLIC_ASSET_BASE empty: files live in public/model/ and public/video/)
  * Write the FILE NAME only. Never a full link, never a *.r2.dev URL.
  * Object names are case-sensitive in R2: keep them lowercase.
  */
@@ -16,7 +17,7 @@ export function R2(file: string): string {
   const folder = FOLDER[ext];
   if (!folder) throw new Error(`R2("${file}"): extension must be one of ${Object.keys(FOLDER).join(', ')}`);
   if (!NAME_OK.test(file)) throw new Error(`R2("${file}"): letters, digits, dot, dash, underscore only (no spaces, no slashes)`);
-  return `${BASE}/${folder}/${file}`;
+  return BASE ? `${BASE}/${file}` : `/${folder}/${file}`;
 }
 
 /** R2Model('chair') -> { glb: R2('chair.glb'), usdz: R2('chair.usdz') } */
@@ -28,7 +29,8 @@ export function R2Model(name: string) {
 export function isR2Url(url: string, kind: 'glb' | 'usdz' | 'video'): boolean {
   const exts = kind === 'video' ? ['mp4', 'webm'] : [kind];
   const folder = kind === 'video' ? 'video' : 'model';
-  const re = new RegExp(`^${BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/${folder}/[a-z0-9][a-z0-9._-]*\\.(${exts.join('|')})$`, 'i');
+  const prefix = BASE ? BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : `/${folder}`;
+  const re = new RegExp(`^${prefix}/[a-z0-9][a-z0-9._-]*\\.(${exts.join('|')})$`, 'i');
   return re.test(url) && NAME_OK.test(url.split('/').pop() ?? '');
 }
 

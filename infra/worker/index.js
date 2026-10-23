@@ -9,12 +9,14 @@
 const ALLOWED_ORIGINS = new Set([
   "https://www.furnibloc.com",
   "https://furnibloc.com",
-  "https://___.pages.dev", // production pages.dev domain — fill in once the Pages project exists
+  "https://___.pages.dev",
+  "http://localhost:4321/" // production pages.dev domain — fill in once the Pages project exists
 ]);
 // Preview deployments of THIS project only: https://<hash>.<project>.pages.dev  (decision D9)
 const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+\.___\.pages\.dev$/; // replace ___ with the Pages project name
 
-const KEY_PATTERN = /^(model|video)\/[a-z0-9][a-z0-9._-]*\.(glb|usdz|mp4|webm)$/i;
+// Files sit at the ROOT of the bucket: https://<worker>/white_nightstand.glb  (no folder prefix).
+const KEY_PATTERN = /^[a-z0-9][a-z0-9._-]*\.(glb|usdz|mp4|webm)$/i;
 
 // Dashboard uploads often arrive as application/octet-stream; iOS Quick Look cares, so set it here.
 const CONTENT_TYPES = {
