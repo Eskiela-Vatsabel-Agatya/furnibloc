@@ -62,7 +62,8 @@ class Stage {
     else if (import.meta.env.DEV && !this.warnedNoUsdz) { this.warnedNoUsdz = true; console.info(`[stage] ${this.glb} has no .usdz: iOS will not get AR.`); }
     v.setAttribute('alt', this.el.dataset.alt ?? '');
     v.setAttribute('ar', '');
-    v.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
+    // scene-viewer first: Google's own AR app (floor lock, shutter, menu). webxr is the bare in-browser fallback. iOS uses quick-look.
+    v.setAttribute('ar-modes', 'scene-viewer webxr quick-look');
     v.setAttribute('camera-controls', '');
     v.setAttribute('touch-action', 'pan-y');
     v.setAttribute('shadow-intensity', '1');
